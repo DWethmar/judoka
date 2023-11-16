@@ -13,10 +13,12 @@ var (
 )
 
 type stores struct {
-	TransformIDGenerator *IDGenerator
-	Transform            *Store[*component.Transform]
-	SpriteIDGenerator    *IDGenerator
-	Sprite               *Store[*component.Sprite]
+	TransformIDGenerator  *IDGenerator
+	Transform             *Store[*component.Transform]
+	SpriteIDGenerator     *IDGenerator
+	Sprite                *Store[*component.Sprite]
+	ControllerIDGenerator *IDGenerator
+	Controller            *Store[*component.Controller]
 }
 
 // Registry keeps track of all entities and their components.
@@ -32,9 +34,8 @@ type Registry struct {
 // It initializes the entity map and the component stores.
 func New() *Registry {
 	return &Registry{
-		idGenerator: NewIDGenerator(),
 		stores: stores{
-			TransformIDGenerator: NewIDGenerator(),
+			TransformIDGenerator: NewIDGenerator(0),
 			Transform: NewStore[*component.Transform](
 				func(s *Store[*component.Transform]) {
 					s.BeforeAdd = func(c component.Component) error {
@@ -51,7 +52,7 @@ func New() *Registry {
 					}
 				},
 			),
-			SpriteIDGenerator: NewIDGenerator(),
+			SpriteIDGenerator: NewIDGenerator(0),
 			Sprite: NewStore[*component.Sprite](
 				func(s *Store[*component.Sprite]) {
 					s.BeforeAdd = func(c component.Component) error {
@@ -63,7 +64,27 @@ func New() *Registry {
 					}
 				},
 			),
+			ControllerIDGenerator: NewIDGenerator(0),
+			Controller: NewStore[*component.Controller](
+				func(s *Store[*component.Controller]) {
+					s.BeforeAdd = func(c component.Component) error {
+						if err := ValidateComponent(c); err != nil {
+							return err
+						}
+
+						// unique component
+						if len(s.store[c.Entity()]) > 0 {
+							return ErrUnique
+						}
+
+						return nil
+					}
+				},
+			),
 		},
+		idGenerator: NewIDGenerator(0),
+		mux:         sync.RWMutex{},
+		entities:    make(map[entity.Entity]struct{}),
 	}
 }
 
@@ -91,4 +112,5 @@ func (r *Registry) DeleteEntity(e entity.Entity) {
 	// Remove all components associated with the entity.
 	r.Transform.RemoveEntity(e)
 	r.Sprite.RemoveEntity(e)
+	r.Controller.RemoveEntity(e)
 }

@@ -3,12 +3,14 @@ package main
 import (
 	"log"
 	"log/slog"
+	"os"
 
 	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/game"
 	"github.com/dwethmar/judoka/system"
+	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -29,11 +31,17 @@ func main() {
 	AddTestEntity1(registry)
 
 	// logger
-	logger := slog.Default()
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+
+	handler := slog.NewTextHandler(os.Stdout, opts)
+	logger := slog.New(handler)
 
 	// systems
 	var systems []system.System = []system.System{
 		render.New(logger, registry),
+		input.New(logger, registry),
 	}
 
 	if err := ebiten.RunGame(
@@ -56,6 +64,11 @@ func AddTestEntity1(r *registry.Registry) {
 
 	sprite := component.NewSprite(0, e, 0, 0, assets.SkeletonDown1)
 	if err := r.AddSprite(sprite); err != nil {
+		log.Fatal(err)
+	}
+
+	controller := component.NewController(0, e)
+	if err := r.AddController(controller); err != nil {
 		log.Fatal(err)
 	}
 }

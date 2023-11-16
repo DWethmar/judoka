@@ -9,11 +9,10 @@ var _ Component = (*Transform)(nil)
 type Transform struct {
 	CID    uint32
 	entity entity.Entity
-	X      float64
-	Y      float64
+	X, Y   int
 }
 
-func NewTransform(id uint32, entity entity.Entity, x, y float64) *Transform {
+func NewTransform(id uint32, entity entity.Entity, x, y int) *Transform {
 	return &Transform{
 		CID:    id,
 		entity: entity,
