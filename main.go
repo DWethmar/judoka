@@ -10,8 +10,10 @@ import (
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/game"
 	"github.com/dwethmar/judoka/system"
+	"github.com/dwethmar/judoka/system/debug"
 	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
+	"github.com/dwethmar/judoka/system/velocity"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -40,8 +42,12 @@ func main() {
 
 	// systems
 	var systems []system.System = []system.System{
-		render.New(logger, registry),
 		input.New(logger, registry),
+		// drawing systems
+		render.New(logger, registry),
+		debug.New(logger, registry),
+		// state systems
+		velocity.New(logger, registry),
 	}
 
 	if err := ebiten.RunGame(
@@ -59,6 +65,11 @@ func AddTestEntity1(r *registry.Registry) {
 
 	transform := component.NewTransform(0, e, 100, 100)
 	if err := r.AddTransform(transform); err != nil {
+		log.Fatal(err)
+	}
+
+	velocity := component.NewVelocity(0, e, 0, 0)
+	if err := r.AddVelocity(velocity); err != nil {
 		log.Fatal(err)
 	}
 

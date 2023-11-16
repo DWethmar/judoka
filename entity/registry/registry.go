@@ -19,6 +19,15 @@ type stores struct {
 	Sprite                *Store[*component.Sprite]
 	ControllerIDGenerator *IDGenerator
 	Controller            *Store[*component.Controller]
+	VelocityIDGenerator   *IDGenerator
+	Velocity              *Store[*component.Velocity]
+}
+
+func (s *stores) DeleteEntity(e entity.Entity) {
+	s.Transform.RemoveEntity(e)
+	s.Sprite.RemoveEntity(e)
+	s.Controller.RemoveEntity(e)
+	s.Velocity.RemoveEntity(e)
 }
 
 // Registry keeps track of all entities and their components.
@@ -81,6 +90,23 @@ func New() *Registry {
 					}
 				},
 			),
+			VelocityIDGenerator: NewIDGenerator(0),
+			Velocity: NewStore[*component.Velocity](
+				func(s *Store[*component.Velocity]) {
+					s.BeforeAdd = func(c component.Component) error {
+						if err := ValidateComponent(c); err != nil {
+							return err
+						}
+
+						// unique component
+						if len(s.store[c.Entity()]) > 0 {
+							return ErrUnique
+						}
+
+						return nil
+					}
+				},
+			),
 		},
 		idGenerator: NewIDGenerator(0),
 		mux:         sync.RWMutex{},
@@ -108,9 +134,5 @@ func (r *Registry) DeleteEntity(e entity.Entity) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 	delete(r.entities, e)
-
-	// Remove all components associated with the entity.
-	r.Transform.RemoveEntity(e)
-	r.Sprite.RemoveEntity(e)
-	r.Controller.RemoveEntity(e)
+	r.stores.DeleteEntity(e)
 }

@@ -23,11 +23,6 @@ func New(logger *slog.Logger, registry *registry.Registry) *System {
 	}
 }
 
-// Debug implements system.System.
-func (*System) Debug(screen *ebiten.Image) error {
-	return nil
-}
-
 // Draw implements system.System.
 func (r *System) Draw(screen *ebiten.Image) error {
 	for _, sprite := range r.registry.ListSprites() {
@@ -37,8 +32,11 @@ func (r *System) Draw(screen *ebiten.Image) error {
 			continue
 		}
 
-		x := float64(transform.X + sprite.OffsetX)
-		y := float64(transform.Y + sprite.OffsetY)
+		nX := transform.X / system.PositionResolution
+		nY := transform.Y / system.PositionResolution
+
+		x := float64(nX + sprite.OffsetX)
+		y := float64(nY + sprite.OffsetY)
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(x, y)

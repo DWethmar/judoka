@@ -26,11 +26,6 @@ func New(logger *slog.Logger, registry *registry.Registry) *System {
 	}
 }
 
-// Debug implements system.System.
-func (*System) Debug(screen *ebiten.Image) error {
-	return nil
-}
-
 // Draw implements system.System.
 func (*System) Draw(screen *ebiten.Image) error {
 	return nil
@@ -43,9 +38,6 @@ func (s *System) Update() error {
 		return nil
 	}
 
-	dx *= defaultSpeed
-	dy *= defaultSpeed
-
 	// Calculate the length of the vector (dx, dy)
 	length := math.Sqrt(float64(dx*dx + dy*dy))
 
@@ -56,14 +48,14 @@ func (s *System) Update() error {
 	// Use the normalized values for transformation
 	for _, c := range s.registry.ListControllers() {
 		entity := c.Entity()
-		transform := s.registry.GetTransform(entity)
-		if transform == nil {
+		vel := s.registry.GetVelocity(entity)
+		if vel == nil {
 			continue
 		}
 
 		// Update position based on normalized direction
-		transform.X += int(math.Round(normalizedDx))
-		transform.Y += int(math.Round(normalizedDy))
+		vel.X = int(math.Round(normalizedDx)) * system.PositionResolution
+		vel.Y = int(math.Round(normalizedDy)) * system.PositionResolution
 	}
 
 	return nil

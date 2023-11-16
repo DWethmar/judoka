@@ -2,9 +2,12 @@ package system
 
 import "github.com/hajimehoshi/ebiten/v2"
 
+const (
+	PositionResolution = 10
+)
+
 // System is a system that can be updated.
 type System interface {
 	Update() error
 	Draw(screen *ebiten.Image) error
-	Debug(screen *ebiten.Image) error
 }

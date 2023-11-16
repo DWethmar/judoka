@@ -36,12 +36,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.logger.Error(err.Error())
 		}
 	}
-
-	for _, s := range g.systems {
-		if err := s.Debug(screen); err != nil {
-			g.logger.Error(err.Error())
-		}
-	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
