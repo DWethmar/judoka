@@ -1,0 +1,72 @@
+run:
+  # Timeout for analysis, e.g. 30s, 5m.
+  # Default: 1m
+  timeout: 3m
+
+
+# This file contains only configs which differ from defaults.
+# All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
+linters-settings:
+  errcheck:
+    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-type-assertions: true
+  exhaustive:
+    # Program elements to check for exhaustiveness.
+    # Default: [ switch ]
+    check:
+      - switch
+      - map
+  govet:
+    check-shadowing: true
+  gocyclo:
+    min-complexity: 10
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  misspell:
+    locale: US
+  interfacebloat:
+    # The maximum number of methods allowed for an interface.
+    # Default: 10
+    max: 5
+  goimports:
+    # A comma-separated list of prefixes, which, if set, checks import paths
+    # with the given prefixes are grouped after 3rd-party packages.
+    # Default: ""
+    local-prefixes: github.com/dwethmar/atemi
+
+linters:
+  enable:
+    - misspell
+    - errcheck
+    - govet
+    - unused
+    - ineffassign
+    - goconst
+    - gofmt
+    - gosimple
+    - gosec
+    - bodyclose
+    - staticcheck
+    - gocyclo
+    - misspell
+    - unparam
+    - nakedret
+    - prealloc
+    - exportloopref
+    - gocritic
+    - goimports
+    - revive
+    - gosec
+    - gomnd
+    - decorder # checks declaration order and count of types, constants, variables and functions
+    # - exhaustruct # [highly recommend to enable] checks if all structure fields are initialized
+    - godox # detects FIXME, TODO and other comment keywords
+    - interfacebloat # checks the number of methods inside an interface
+    - ireturn # accept interfaces, return concrete types
+    - prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
+    - wrapcheck # checks that errors returned from external packages are wrapped
