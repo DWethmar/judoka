@@ -43,9 +43,15 @@ func (m *PlayerManager) animate(actor *component.Actor) error {
 		return nil
 	}
 
-	d := direction.Get(actor.PreviousX, actor.PreviousY, transform.X, transform.Y)
+	velocity, ok := m.registry.Velocity.First(e)
+	if !ok {
+		return nil
+	}
 
-	if actor.Moving {
+	isMoving := velocity.X != 0 || velocity.Y != 0
+
+	if isMoving {
+		d := direction.Get(transform.X, transform.Y, velocity.X, velocity.Y)
 		var frames []image.Image
 		switch d {
 		case direction.Top, direction.TopLeft, direction.TopRight:
@@ -60,11 +66,12 @@ func (m *PlayerManager) animate(actor *component.Actor) error {
 			frames = assets.SkeletonMoveDownFrames
 		}
 		actor.AnimationFrame = (actor.AnimationFrame + 1) % len(frames)
+		actor.Facing = d
 		sprite.Image = frames[actor.AnimationFrame].(*ebiten.Image)
 	} else {
 		actor.AnimationFrame = 0
 		var image *ebiten.Image
-		switch d {
+		switch actor.Facing {
 		case direction.Top, direction.TopLeft, direction.TopRight:
 			image = assets.SkeletonDown1
 		case direction.Bottom, direction.BottomLeft, direction.BottomRight:

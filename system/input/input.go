@@ -59,14 +59,6 @@ func (s *System) Update() error {
 		// Update position based on normalized direction
 		vel.X = int(math.Round(normalizedDx)) * system.PositionResolution
 		vel.Y = int(math.Round(normalizedDy)) * system.PositionResolution
-
-		// Update actor
-		actor, ok := s.registry.Actor.First(e)
-		if !ok {
-			continue
-		}
-
-		actor.Moving = true
 	}
 
 	return nil

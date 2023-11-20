@@ -42,12 +42,6 @@ func (s *System) Update() error {
 			continue
 		}
 
-		actor, ok := s.registry.Actor.First(e)
-		if ok {
-			actor.PreviousX = transform.X
-			actor.PreviousY = transform.Y
-		}
-
 		transform.X += velocity.X
 		transform.Y += velocity.Y
 

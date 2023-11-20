@@ -1,5 +1,6 @@
 package direction
 
+//go:generate stringer -type=Direction
 type Direction int
 
 const (

@@ -1,6 +1,7 @@
 package component
 
 import (
+	"github.com/dwethmar/judoka/direction"
 	"github.com/dwethmar/judoka/entity"
 )
 
@@ -18,9 +19,7 @@ type Actor struct {
 	CID            uint32
 	entity         entity.Entity
 	ActorType      ActorType
-	Moving         bool
-	PreviousX      int
-	PreviousY      int
+	Facing         direction.Direction
 	AnimationFrame int
 }
 

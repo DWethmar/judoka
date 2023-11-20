@@ -57,15 +57,11 @@ func (s *System) Draw(screen *ebiten.Image) error {
 		}
 
 		text.Draw(screen, fmt.Sprintf(`ACTOR %d
-Moving: %v
-PrevX: %d 
-PrevY: %d
+Facing %d
 AnimationFrame: %d
 `,
 			actor.ActorType,
-			actor.Moving,
-			actor.PreviousX,
-			actor.PreviousY,
+			actor.Facing,
 			actor.AnimationFrame,
 		), assets.GetVGAFonts(2), x, y+30, color.White)
 	}
