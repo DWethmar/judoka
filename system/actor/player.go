@@ -43,15 +43,15 @@ func (m *PlayerManager) animate(actor *component.Actor) error {
 		return nil
 	}
 
-	velocity, ok := m.registry.Velocity.First(e)
+	controller, ok := m.registry.Controller.First(e)
 	if !ok {
 		return nil
 	}
 
-	isMoving := velocity.X != 0 || velocity.Y != 0
+	isMoving := controller.X != 0 || controller.Y != 0
 
 	if isMoving {
-		d := direction.Get(transform.X, transform.Y, velocity.X, velocity.Y)
+		d := direction.Get(transform.X, transform.Y, transform.X+controller.X, transform.Y+controller.Y)
 		var frames []image.Image
 		switch d {
 		case direction.Top, direction.TopLeft, direction.TopRight:

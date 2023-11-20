@@ -39,6 +39,17 @@ func (*System) Draw(screen *ebiten.Image) error {
 func (s *System) Update() error {
 	dx, dy := Direction()
 	if dx == 0 && dy == 0 {
+		// Reset controller
+		for _, e := range s.registry.Controller.Entities() {
+			controller, ok := s.registry.Controller.First(e)
+			if !ok {
+				continue
+			}
+
+			controller.X = 0
+			controller.Y = 0
+		}
+
 		return nil
 	}
 
@@ -59,6 +70,15 @@ func (s *System) Update() error {
 		// Update position based on normalized direction
 		vel.X = int(math.Round(normalizedDx)) * system.PositionResolution
 		vel.Y = int(math.Round(normalizedDy)) * system.PositionResolution
+
+		// update controller
+		controller, ok := s.registry.Controller.First(e)
+		if !ok {
+			continue
+		}
+
+		controller.X = dx
+		controller.Y = dy
 	}
 
 	return nil

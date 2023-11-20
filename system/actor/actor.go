@@ -57,7 +57,7 @@ func (s *System) Draw(screen *ebiten.Image) error {
 		}
 
 		text.Draw(screen, fmt.Sprintf(`ACTOR %d
-Facing %d
+Facing %s
 AnimationFrame: %d
 `,
 			actor.ActorType,

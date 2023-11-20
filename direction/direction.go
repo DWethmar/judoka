@@ -1,18 +1,17 @@
 package direction
 
-//go:generate stringer -type=Direction
-type Direction int
+type Direction string
 
 const (
-	None Direction = iota
-	Top
-	Bottom
-	Left
-	Right
-	TopLeft
-	TopRight
-	BottomLeft
-	BottomRight
+	None        Direction = "none"
+	Top         Direction = "top"
+	Bottom      Direction = "bottom"
+	Left        Direction = "left"
+	Right       Direction = "right"
+	TopLeft     Direction = "top_left"
+	TopRight    Direction = "top_right"
+	BottomLeft  Direction = "bottom_left"
+	BottomRight Direction = "bottom_right"
 )
 
 func Get(sX, sY, dX, dY int) Direction {
