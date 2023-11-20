@@ -11,9 +11,10 @@ import (
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/game"
 	"github.com/dwethmar/judoka/system"
-	"github.com/dwethmar/judoka/system/debug"
+	"github.com/dwethmar/judoka/system/actor"
 	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
+	"github.com/dwethmar/judoka/system/terrain"
 	"github.com/dwethmar/judoka/system/velocity"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -31,8 +32,8 @@ func main() {
 
 	// registry
 	registry := registry.New()
-	p := AddTestEntity1(registry)
-	AddTestEntity2(registry, p)
+	AddPlayer(registry)
+	// AddTestEntity2(registry, p)
 
 	// logger
 	opts := &slog.HandlerOptions{
@@ -46,10 +47,11 @@ func main() {
 	var systems []system.System = []system.System{
 		input.New(logger, registry),
 		// drawing systems
+		terrain.New(logger, registry),
 		render.New(logger, registry),
-		debug.New(logger, registry),
-		// state systems
+		// other systems
 		velocity.New(logger, registry),
+		actor.New(logger, registry),
 	}
 
 	if err := ebiten.RunGame(
@@ -59,13 +61,13 @@ func main() {
 	}
 }
 
-func AddTestEntity1(r *registry.Registry) entity.Entity {
+func AddPlayer(r *registry.Registry) entity.Entity {
 	e, err := r.Create(r.Root())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	transform := component.NewTransform(0, e, 100, 100)
+	transform := component.NewTransform(0, e, 0, 0)
 	if err := r.Transform.Add(transform); err != nil {
 		log.Fatal(err)
 	}
@@ -75,13 +77,14 @@ func AddTestEntity1(r *registry.Registry) entity.Entity {
 		log.Fatal(err)
 	}
 
-	sprite := component.NewSprite(0, e, 0, 0, assets.SkeletonDown1)
-	if err := r.Sprite.Add(sprite); err != nil {
+	controller := component.NewController(0, e)
+	if err := r.Controller.Add(controller); err != nil {
 		log.Fatal(err)
 	}
 
-	controller := component.NewController(0, e)
-	if err := r.Controller.Add(controller); err != nil {
+	actor := component.NewActor(0, e)
+	actor.ActorType = component.ActorTypePlayer
+	if err := r.Actor.Add(actor); err != nil {
 		log.Fatal(err)
 	}
 

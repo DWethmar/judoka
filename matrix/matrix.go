@@ -10,10 +10,13 @@ func (m Matrix) Set(x, y int32, v int32) {
 	m[y][x] = v
 }
 
-func New(width, height int) Matrix {
-	m := make(Matrix, height)
+func New(width, height int, v int32) Matrix {
+	m := make([][]int32, height)
 	for i := range m {
 		m[i] = make([]int32, width)
+		for j := range m[i] {
+			m[i][j] = v
+		}
 	}
 	return m
 }

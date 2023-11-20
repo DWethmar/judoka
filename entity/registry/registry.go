@@ -19,6 +19,8 @@ type Stores struct {
 	Sprite     *Store[*component.Sprite]     // 2
 	Controller *Store[*component.Controller] // 3
 	Velocity   *Store[*component.Velocity]   // 4
+	Actor      *Store[*component.Actor]      // 5
+	Chunk      *Store[*component.Chunk]      // 6
 }
 
 func (s *Stores) RemoveFromStores(e entity.Entity) {
@@ -26,6 +28,8 @@ func (s *Stores) RemoveFromStores(e entity.Entity) {
 	s.Sprite.RemoveAll(e)     // 2
 	s.Controller.RemoveAll(e) // 3
 	s.Velocity.RemoveAll(e)   // 4
+	s.Actor.RemoveAll(e)      // 5
+	s.Chunk.RemoveAll(e)      // 6
 }
 
 // Registry keeps track of all entities and their components.
@@ -42,77 +46,7 @@ type Registry struct {
 func New() *Registry {
 	idGen := ids.New(0)
 	return &Registry{
-		Stores: Stores{
-			Transform: NewStore[*component.Transform](
-				func(s *Store[*component.Transform]) {
-					idGen := ids.New(0)
-					s.BeforeAdd = func(c *component.Transform) error {
-						c.CID = idGen.Next()
-						if err := ValidateComponent(c); err != nil {
-							return err
-						}
-
-						// unique component
-						if len(s.store[c.Entity()]) > 0 {
-							return ErrUniqueConstraintFailed
-						}
-
-						return nil
-					}
-				},
-			),
-			Sprite: NewStore[*component.Sprite](
-				func(s *Store[*component.Sprite]) {
-					idGen := ids.New(0)
-					s.BeforeAdd = func(c *component.Sprite) error {
-						c.CID = idGen.Next()
-						if err := ValidateComponent(c); err != nil {
-							return err
-						}
-
-						return nil
-					}
-				},
-			),
-			Controller: NewStore[*component.Controller](
-				func(s *Store[*component.Controller]) {
-					idGen := ids.New(0)
-					s.BeforeAdd = func(c *component.Controller) error {
-						c.CID = idGen.Next()
-
-						if err := ValidateComponent(c); err != nil {
-							return err
-						}
-
-						// unique component
-						if len(s.store[c.Entity()]) > 0 {
-							return ErrUniqueConstraintFailed
-						}
-
-						return nil
-					}
-				},
-			),
-			Velocity: NewStore[*component.Velocity](
-				func(s *Store[*component.Velocity]) {
-					idGen := ids.New(0)
-					s.BeforeAdd = func(c *component.Velocity) error {
-						c.CID = idGen.Next()
-
-						if err := ValidateComponent(c); err != nil {
-							return err
-						}
-
-						// unique component
-						if len(s.store[c.Entity()]) > 0 {
-							return ErrUniqueConstraintFailed
-						}
-
-						return nil
-					}
-				},
-			),
-		},
+		Stores:      stores,
 		idGenerator: idGen,
 		mux:         sync.RWMutex{},
 		hierarchy:   hierarchy.New(entity.Entity(0)),

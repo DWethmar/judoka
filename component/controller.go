@@ -7,6 +7,7 @@ const ControllerType = "controller"
 type Controller struct {
 	CID    uint32
 	entity entity.Entity
+	X, Y   int
 }
 
 func NewController(id uint32, entity entity.Entity) *Controller {

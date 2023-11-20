@@ -28,20 +28,24 @@ func New(logger *slog.Logger, registry *registry.Registry) *System {
 // Update implements system.System.
 func (s *System) Update() error {
 	for _, e := range s.registry.Velocity.Entities() {
-		transform := s.registry.Transform.List(e)[0]
-		if transform == nil {
-			s.logger.Debug("no transform")
+		transform, ok := s.registry.Transform.First(e)
+		if !ok {
 			continue
 		}
 
-		velocity := s.registry.Velocity.List(e)[0]
-		if velocity == nil {
-			s.logger.Debug("no velocity, which is weird")
+		velocity, ok := s.registry.Velocity.First(e)
+		if !ok {
 			continue
 		}
 
 		if velocity.X == 0 && velocity.Y == 0 {
 			continue
+		}
+
+		actor, ok := s.registry.Actor.First(e)
+		if ok {
+			actor.PreviousX = transform.X
+			actor.PreviousY = transform.Y
 		}
 
 		transform.X += velocity.X
