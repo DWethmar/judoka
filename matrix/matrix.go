@@ -1,19 +1,19 @@
 package matrix
 
-type Matrix [][]int32
+type Matrix [][]int
 
-func (m Matrix) Get(x, y int32) int32 {
+func (m Matrix) Get(x, y int) int {
 	return m[y][x]
 }
 
-func (m Matrix) Set(x, y int32, v int32) {
+func (m Matrix) Set(x, y int, v int) {
 	m[y][x] = v
 }
 
-func New(width, height int, v int32) Matrix {
-	m := make([][]int32, height)
+func New(width, height, v int) Matrix {
+	m := make([][]int, height)
 	for i := range m {
-		m[i] = make([]int32, width)
+		m[i] = make([]int, width)
 		for j := range m[i] {
 			m[i][j] = v
 		}
@@ -21,10 +21,10 @@ func New(width, height int, v int32) Matrix {
 	return m
 }
 
-func Iterate(m Matrix, fn func(x, y, v int32)) {
+func Iterate(m Matrix, fn func(x, y, v int)) {
 	for y := range m {
 		for x, v := range m[y] {
-			fn(int32(x), int32(y), v)
+			fn(x, x, v)
 		}
 	}
 }

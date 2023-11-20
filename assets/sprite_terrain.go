@@ -14,16 +14,21 @@ var (
 )
 
 var (
-	TerrainGrassCC     *ebiten.Image
-	TerrainGrassDirtTL *ebiten.Image
-	TerrainGrassDirtTC *ebiten.Image
-	TerrainGrassDirtTR *ebiten.Image
-	TerrainGrassDirtLC *ebiten.Image
-	TerrainGrassDirtRC *ebiten.Image
-	TerrainGrassDirtBL *ebiten.Image
-	TerrainGrassDirtBC *ebiten.Image
-	TerrainGrassDirtBR *ebiten.Image
-	TerrainDirtCC      *ebiten.Image
+	TerrainGrassCC              *ebiten.Image
+	TerrainGrassDirtBottomRight *ebiten.Image
+	TerrainGrassDirtBottom      *ebiten.Image
+	TerrainGrassDirtBottomLeft  *ebiten.Image
+	TerrainGrassDirtLeft        *ebiten.Image
+	TerrainGrassDirtRight       *ebiten.Image
+	TerrainGrassDirtTopRight    *ebiten.Image
+	TerrainGrassDirtTop         *ebiten.Image
+	TerrainGrassDirtTopLeft     *ebiten.Image
+
+	TerrainDirtCC                *ebiten.Image
+	TerrainDirtGrassBottomRigtht *ebiten.Image
+	TerrainDirtGrassBottomLeft   *ebiten.Image
+	TerrainDirtGrassTopRight     *ebiten.Image
+	TerrainDirtGrassTopLeft      *ebiten.Image
 )
 
 func init() {
@@ -38,16 +43,22 @@ func init() {
 	// grass
 	TerrainGrassCC = terrainImg.SubImage(cells[0][0]).(*ebiten.Image)
 
-	// Grass Dirt
-	TerrainGrassDirtTL = terrainImg.SubImage(cells[0][1]).(*ebiten.Image)
-	TerrainGrassDirtTC = terrainImg.SubImage(cells[1][1]).(*ebiten.Image)
-	TerrainGrassDirtTR = terrainImg.SubImage(cells[2][1]).(*ebiten.Image)
-	TerrainGrassDirtLC = terrainImg.SubImage(cells[0][2]).(*ebiten.Image)
-	TerrainGrassDirtRC = terrainImg.SubImage(cells[2][2]).(*ebiten.Image)
-	TerrainGrassDirtBL = terrainImg.SubImage(cells[0][3]).(*ebiten.Image)
-	TerrainGrassDirtBC = terrainImg.SubImage(cells[1][3]).(*ebiten.Image)
-	TerrainGrassDirtBR = terrainImg.SubImage(cells[2][3]).(*ebiten.Image)
+	// Grass Dirt Corners 3 X 3
+	TerrainGrassDirtBottomRight = terrainImg.SubImage(cells[0][1]).(*ebiten.Image)
+	TerrainGrassDirtBottom = terrainImg.SubImage(cells[1][1]).(*ebiten.Image)
+	TerrainGrassDirtBottomLeft = terrainImg.SubImage(cells[2][1]).(*ebiten.Image)
+	TerrainGrassDirtLeft = terrainImg.SubImage(cells[0][2]).(*ebiten.Image)
+	TerrainGrassDirtRight = terrainImg.SubImage(cells[2][2]).(*ebiten.Image)
+	TerrainGrassDirtTopRight = terrainImg.SubImage(cells[0][3]).(*ebiten.Image)
+	TerrainGrassDirtTop = terrainImg.SubImage(cells[1][3]).(*ebiten.Image)
+	TerrainGrassDirtTopLeft = terrainImg.SubImage(cells[2][3]).(*ebiten.Image)
 
-	// Dirt
+	// dirt
 	TerrainDirtCC = terrainImg.SubImage(cells[1][2]).(*ebiten.Image)
+
+	// Dirt Grass Corners 2 X 2
+	TerrainDirtGrassBottomRigtht = terrainImg.SubImage(cells[3][1]).(*ebiten.Image)
+	TerrainDirtGrassBottomLeft = terrainImg.SubImage(cells[4][1]).(*ebiten.Image)
+	TerrainDirtGrassTopRight = terrainImg.SubImage(cells[3][2]).(*ebiten.Image)
+	TerrainDirtGrassTopLeft = terrainImg.SubImage(cells[4][2]).(*ebiten.Image)
 }

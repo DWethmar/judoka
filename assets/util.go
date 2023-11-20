@@ -6,7 +6,7 @@ import "image"
 // that can be used to draw sprites from a sprite sheet.
 //
 // the rectangles are from left to right, top to bottom
-// cells[row][column]
+// cells[row][column] or cells[x][y]
 func CreateCells(columns, rows, width, height int) [][]image.Rectangle {
 	cells := make([][]image.Rectangle, columns)
 

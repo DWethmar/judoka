@@ -2,18 +2,17 @@ package terrain
 
 import (
 	"fmt"
-	"image/color"
 	"log/slog"
 
 	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
-	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
-	"github.com/dwethmar/judoka/matrix"
+	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
 	"github.com/dwethmar/judoka/transform"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/exp/shiny/materialdesign/colornames"
 )
 
 const (
@@ -26,15 +25,14 @@ var _ system.System = &System{}
 type System struct {
 	logger   *slog.Logger
 	registry *registry.Registry
-	init     bool
-	chunks   map[int]map[int]entity.Entity
+	level    *level.Level
 }
 
 func New(logger *slog.Logger, registry *registry.Registry) *System {
 	return &System{
 		logger:   logger.WithGroup("terrain"),
 		registry: registry,
-		chunks:   make(map[int]map[int]entity.Entity),
+		level:    level.New(ChunkSize),
 	}
 }
 
@@ -51,26 +49,31 @@ func (s *System) Draw(screen *ebiten.Image) error {
 
 		for i := 0; i < ChunkSize; i++ {
 			for j := 0; j < ChunkSize; j++ {
-				tile := c.Tiles.Get(int32(i), int32(j))
+				tile := c.Tiles.Get(i, j)
 
-				if Tiles[tile] == nil {
-					continue
+				image := Shapes(ChunkSize*c.X+i, ChunkSize*c.Y+j, s.level)
+				if image == nil {
+					// skip drawing
+					goto drawdebug
 				}
 
-				image := Tiles[tile]
+				{
+					w := image.Bounds().Max.X - image.Bounds().Min.X
+					h := image.Bounds().Max.Y - image.Bounds().Min.Y
 
-				w := image.Bounds().Max.X - image.Bounds().Min.X
-				h := image.Bounds().Max.Y - image.Bounds().Min.Y
-
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
-				op.GeoM.Translate(float64(x+i*TileSize), float64(y+j*TileSize))
-				screen.DrawImage(image, op)
-
-				// draw chunk x, y
-				text.Draw(screen, fmt.Sprintf("%d, %d", c.X, c.Y), assets.GetVGAFonts(3), x+40, y+40, color.White)
+					op := &ebiten.DrawImageOptions{}
+					op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
+					op.GeoM.Translate(float64(x+i*TileSize), float64(y+j*TileSize))
+					screen.DrawImage(image, op)
+				}
+			drawdebug:
+				// tile number
+				text.Draw(screen, fmt.Sprintf("%d", tile), assets.GetVGAFonts(2), x+i*TileSize+10, y+j*TileSize+12, colornames.Yellow700)
 			}
 		}
+
+		// draw chunk x, y
+		text.Draw(screen, fmt.Sprintf("%d, %d", c.X, c.Y), assets.GetVGAFonts(3), x+40, y+40, colornames.Blue100)
 	}
 
 	return nil
@@ -84,18 +87,8 @@ func (s *System) Update() error {
 		chunkX := (x / system.PositionResolution) / (ChunkSize * TileSize)
 		chunkY := (y / system.PositionResolution) / (ChunkSize * TileSize)
 
-		s.logger.Debug(
-			"Chunk position",
-			slog.Int("x", chunkX),
-			slog.Int("y", chunkY),
-		)
-
-		// do we have this chunk?
-		if _, ok := s.chunks[chunkX]; !ok {
-			s.chunks[chunkX] = make(map[int]entity.Entity)
-		}
-
-		if _, ok := s.chunks[chunkX][chunkY]; !ok {
+		c := s.level.GetChunk(chunkX, chunkY)
+		if c == nil {
 			// create chunk
 			e, err := s.registry.Create(s.registry.Root())
 			if err != nil {
@@ -105,13 +98,14 @@ func (s *System) Update() error {
 			c := component.NewChunk(0, e)
 			c.X = chunkX
 			c.Y = chunkY
-			c.Tiles = matrix.New(ChunkSize, ChunkSize, 0)
+			// c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
+			c.Tiles = TestChunk()
 
 			if err := s.registry.Chunk.Add(c); err != nil {
 				return fmt.Errorf("failed to add chunk: %w", err)
 			}
 
-			s.chunks[chunkX][chunkY] = e
+			s.level.SetChunk(chunkX, chunkY, c.Tiles)
 		}
 	}
 

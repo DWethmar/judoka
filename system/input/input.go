@@ -68,8 +68,8 @@ func (s *System) Update() error {
 		}
 
 		// Update position based on normalized direction
-		vel.X = int(math.Round(normalizedDx)) * system.PositionResolution
-		vel.Y = int(math.Round(normalizedDy)) * system.PositionResolution
+		vel.X = int(math.Round(normalizedDx) * defaultSpeed * system.PositionResolution)
+		vel.Y = int(math.Round(normalizedDy) * defaultSpeed * system.PositionResolution)
 
 		// update controller
 		controller, ok := s.registry.Controller.First(e)
