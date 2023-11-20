@@ -27,41 +27,52 @@ func New(logger *slog.Logger, registry *registry.Registry) *System {
 
 // Update implements system.System.
 func (s *System) Update() error {
-	for _, c := range s.registry.ListVelocities() {
-		transform := s.registry.GetTransform(c.Entity())
+	for _, e := range s.registry.Velocity.Entities() {
+		transform := s.registry.Transform.List(e)[0]
 		if transform == nil {
+			s.logger.Debug("no transform")
 			continue
 		}
 
-		transform.X += c.X
-		transform.Y += c.Y
+		velocity := s.registry.Velocity.List(e)[0]
+		if velocity == nil {
+			s.logger.Debug("no velocity, which is weird")
+			continue
+		}
+
+		if velocity.X == 0 && velocity.Y == 0 {
+			continue
+		}
+
+		transform.X += velocity.X
+		transform.Y += velocity.Y
 
 		// Apply drag
-		if c.X > 0 {
-			c.X -= drag
-			if c.X < 0 {
-				c.X = 0
+		if velocity.X > 0 {
+			velocity.X -= drag
+			if velocity.X < 0 {
+				velocity.X = 0
 			}
 		}
 
-		if c.X < 0 {
-			c.X += drag
-			if c.X > 0 {
-				c.X = 0
+		if velocity.X < 0 {
+			velocity.X += drag
+			if velocity.X > 0 {
+				velocity.X = 0
 			}
 		}
 
-		if c.Y > 0 {
-			c.Y -= drag
-			if c.Y < 0 {
-				c.Y = 0
+		if velocity.Y > 0 {
+			velocity.Y -= drag
+			if velocity.Y < 0 {
+				velocity.Y = 0
 			}
 		}
 
-		if c.Y < 0 {
-			c.Y += drag
-			if c.Y > 0 {
-				c.Y = 0
+		if velocity.Y < 0 {
+			velocity.Y += drag
+			if velocity.Y > 0 {
+				velocity.Y = 0
 			}
 		}
 	}

@@ -4,12 +4,10 @@ import "github.com/hajimehoshi/ebiten/v2"
 
 // Direction returns the direction of the input.
 func Direction() (X int, Y int) {
-	var left, right, up, down bool
-
 	// LEFT
 	for _, k := range Left {
 		if ebiten.IsKeyPressed(k) {
-			left = true
+			X -= 1
 			break
 		}
 	}
@@ -17,7 +15,7 @@ func Direction() (X int, Y int) {
 	// RIGHT
 	for _, k := range Right {
 		if ebiten.IsKeyPressed(k) {
-			right = true
+			X += 1
 			break
 		}
 	}
@@ -25,7 +23,7 @@ func Direction() (X int, Y int) {
 	// UP
 	for _, k := range Up {
 		if ebiten.IsKeyPressed(k) {
-			up = true
+			Y -= 1
 			break
 		}
 	}
@@ -33,25 +31,9 @@ func Direction() (X int, Y int) {
 	// DOWN
 	for _, k := range Down {
 		if ebiten.IsKeyPressed(k) {
-			down = true
+			Y += 1
 			break
 		}
-	}
-
-	if left {
-		X = -1
-	}
-
-	if right {
-		X = 1
-	}
-
-	if up {
-		Y = -1
-	}
-
-	if down {
-		Y = 1
 	}
 
 	return

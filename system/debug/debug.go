@@ -27,9 +27,8 @@ func New(logger *slog.Logger, registry *registry.Registry) *System {
 
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
-	for _, c := range s.registry.ListControllers() {
-		entity := c.Entity()
-		transform := s.registry.GetTransform(entity)
+	for _, e := range s.registry.Controller.Entities() {
+		transform := s.registry.Transform.List(e)[0]
 		if transform == nil {
 			continue
 		}
@@ -39,7 +38,7 @@ func (s *System) Draw(screen *ebiten.Image) error {
 
 		text.Draw(screen, fmt.Sprintf("TRANS x: %d (%d), y: %d (%d)", transform.X, x, transform.Y, y), assets.GetVGAFonts(2), x, y, color.White)
 
-		velocity := s.registry.GetVelocity(entity)
+		velocity := s.registry.Velocity.List(e)[0]
 		if velocity == nil {
 			continue
 		}

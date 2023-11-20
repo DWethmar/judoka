@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	TerrainHeight = 32
-	TerrainWidth  = 32
+	TerrainHeight = 320 / 20
+	TerrainWidth  = 224 / 14
 )
 
 var (

@@ -1,12 +1,14 @@
 package input
 
 import (
+	"fmt"
 	"log/slog"
 	"math"
 
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/system"
 	ebiten "github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const defaultSpeed = 2
@@ -28,6 +30,8 @@ func New(logger *slog.Logger, registry *registry.Registry) *System {
 
 // Draw implements system.System.
 func (*System) Draw(screen *ebiten.Image) error {
+	dx, dy := Direction()
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("INPUT X: %d, Y: %d", dx, dy), 500, 50)
 	return nil
 }
 
@@ -46,9 +50,8 @@ func (s *System) Update() error {
 	normalizedDy := float64(dy) / length
 
 	// Use the normalized values for transformation
-	for _, c := range s.registry.ListControllers() {
-		entity := c.Entity()
-		vel := s.registry.GetVelocity(entity)
+	for _, e := range s.registry.Controller.Entities() {
+		vel := s.registry.Velocity.List(e)[0]
 		if vel == nil {
 			continue
 		}

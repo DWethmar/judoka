@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 
@@ -13,7 +14,7 @@ import (
 type Store[T component.Component] struct {
 	mu        sync.RWMutex
 	store     map[entity.Entity][]T
-	BeforeAdd func(c component.Component) error
+	BeforeAdd func(c T) error
 }
 
 type StoreOption[T component.Component] func(*Store[T])
@@ -27,7 +28,7 @@ func NewStore[T component.Component](options ...StoreOption[T]) *Store[T] {
 }
 
 // GetAllEntities returns a sorted slice of all entity identifiers present in the store.
-func (ecs *Store[T]) ListEntities() []entity.Entity {
+func (ecs *Store[T]) Entities() []entity.Entity {
 	ecs.mu.RLock()
 	defer ecs.mu.RUnlock()
 
@@ -42,16 +43,16 @@ func (ecs *Store[T]) ListEntities() []entity.Entity {
 	return ids
 }
 
-// AddComponent adds a new component to the ComponentList associated with an entity.Entity identifier.
+// Add a new component to the ComponentList associated with an entity.Entity identifier.
 // It initializes the component before adding it to the list. If the initialization fails,
 // it returns an error.
-func (ecs *Store[T]) AddComponent(c T) error {
+func (ecs *Store[T]) Add(c T) error {
 	ecs.mu.Lock()
 	defer ecs.mu.Unlock()
 
 	if ecs.BeforeAdd != nil {
 		if err := ecs.BeforeAdd(c); err != nil {
-			return err
+			return fmt.Errorf("before add: %w", err)
 		}
 	}
 
@@ -59,17 +60,39 @@ func (ecs *Store[T]) AddComponent(c T) error {
 	return nil
 }
 
-// GetComponents retrieves the ComponentList associated with an entity.Entity identifier.
-// It returns the list along with a boolean indicating whether the list was found.
-func (ecs *Store[T]) GetComponents(e entity.Entity) []T {
+// First returns the first component associated with an entity.Entity identifier,
+// along with a boolean indicating whether a valid component was found.
+func (ecs *Store[T]) First(e entity.Entity) (T, bool) {
 	ecs.mu.RLock()
 	defer ecs.mu.RUnlock()
-	return ecs.store[e]
+
+	list, ok := ecs.store[e]
+	if !ok || len(list) == 0 {
+		var zero T         // Get the zero value of T
+		return zero, false // Return zero value and false if no component is found
+	}
+
+	return list[0], true // Return the first component and true
 }
 
-// RemoveComponent removes a single component associated with an entity.Entity identifier.
+// List the components associated with an entity.Entity identifier.
+// It returns the list along with a boolean indicating whether the list was found.
+// If the list is not found, it returns an empty list.
+func (ecs *Store[T]) List(e entity.Entity) []T {
+	ecs.mu.RLock()
+	defer ecs.mu.RUnlock()
+
+	list, ok := ecs.store[e]
+	if !ok {
+		return []T{}
+	}
+
+	return list
+}
+
+// Remove removes a single component associated with an entity.Entity identifier.
 // If after removal, the ComponentList is empty, it deletes the entry for the entity from the internal map.
-func (ecs *Store[T]) RemoveComponent(c T) {
+func (ecs *Store[T]) Remove(c T) {
 	ecs.mu.Lock()
 	defer ecs.mu.Unlock()
 
@@ -100,8 +123,8 @@ func (ecs *Store[T]) RemoveComponent(c T) {
 	// If we reach this point, the component was not found; nothing changes
 }
 
-// RemoveEntity removes all components associated with an entity.Entity identifier.
-func (ecs *Store[T]) RemoveEntity(e entity.Entity) {
+// RemoveAll removes all components associated with an entity.Entity identifier.
+func (ecs *Store[T]) RemoveAll(e entity.Entity) {
 	ecs.mu.Lock()
 	defer ecs.mu.Unlock()
 
