@@ -2,6 +2,7 @@ package terrain
 
 import (
 	"fmt"
+	"image"
 	"log/slog"
 
 	"github.com/dwethmar/judoka/assets"
@@ -98,8 +99,8 @@ func (s *System) Update() error {
 			c := component.NewChunk(0, e)
 			c.X = chunkX
 			c.Y = chunkY
-			// c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
-			c.Tiles = TestChunk()
+			c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
+			// c.Tiles = TestChunk()
 
 			if err := s.registry.Chunk.Add(c); err != nil {
 				return fmt.Errorf("failed to add chunk: %w", err)

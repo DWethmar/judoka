@@ -50,5 +50,12 @@ func TestChunk() matrix.Matrix {
 		m.Set(ChunkSize-1, y, 1)
 	}
 
+	// grass 2x2
+	for x := 3; x < 5; x++ {
+		for y := 3; y < 5; y++ {
+			m.Set(x, y, 0)
+		}
+	}
+
 	return m
 }
