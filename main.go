@@ -67,7 +67,7 @@ func AddPlayer(r *registry.Registry) entity.Entity {
 		log.Fatal(err)
 	}
 
-	transform := component.NewTransform(0, e, 0, 0)
+	transform := component.NewTransform(0, e, 4810, 2000)
 	if err := r.Transform.Add(transform); err != nil {
 		log.Fatal(err)
 	}

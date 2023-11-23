@@ -31,6 +31,43 @@ func Generate(r image.Rectangle) matrix.Matrix {
 	return m
 }
 
+func TestChunk2() matrix.Matrix {
+	m := matrix.New(ChunkSize, ChunkSize, 0) // 0 = dirt
+
+	m.Set(1, 0, 1)
+	m.Set(2, 0, 1)
+	m.Set(1, 1, 1)
+	m.Set(2, 1, 1)
+
+	m.Set(0, 2, 1)
+
+	// line verical
+	for y := 0; y < ChunkSize; y++ {
+		m.Set(4, y, 1)
+	}
+
+	m.Set(2, 5, 1)
+
+	// line horizontal
+	for x := 0; x < ChunkSize; x++ {
+		m.Set(x, 4, 1)
+	}
+
+	m.Set(5, 1, 1)
+	m.Set(6, 3, 1)
+	m.Set(3, 14, 1)
+
+	// 4x4
+	var x, y int = 6, 8
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			m.Set(x+i, y+j, 1)
+		}
+	}
+
+	return m
+}
+
 func TestChunk() matrix.Matrix {
 	m := matrix.New(ChunkSize, ChunkSize, 0)
 	for x := 0; x < ChunkSize; x++ {

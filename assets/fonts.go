@@ -14,7 +14,7 @@ import (
 var staticFontFS embed.FS
 
 const (
-	vgaFontsBaseSize = 8
+	vgaFontsBaseSize = 10
 )
 
 var (

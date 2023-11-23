@@ -2,7 +2,6 @@ package terrain
 
 import (
 	"fmt"
-	"image"
 	"log/slog"
 
 	"github.com/dwethmar/judoka/assets"
@@ -69,7 +68,9 @@ func (s *System) Draw(screen *ebiten.Image) error {
 				}
 			drawdebug:
 				// tile number
-				text.Draw(screen, fmt.Sprintf("%d", tile), assets.GetVGAFonts(2), x+i*TileSize+10, y+j*TileSize+12, colornames.Yellow700)
+				dx := (x + i*TileSize)
+				dy := (y + j*TileSize)
+				text.Draw(screen, fmt.Sprintf("T%d\nX%d\nY%d", tile, x+i, y+j), assets.GetVGAFonts(1), dx, dy+12, colornames.Yellow700)
 			}
 		}
 
@@ -99,8 +100,8 @@ func (s *System) Update() error {
 			c := component.NewChunk(0, e)
 			c.X = chunkX
 			c.Y = chunkY
-			c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
-			// c.Tiles = TestChunk()
+			// c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
+			c.Tiles = TestChunk2()
 
 			if err := s.registry.Chunk.Add(c); err != nil {
 				return fmt.Errorf("failed to add chunk: %w", err)
