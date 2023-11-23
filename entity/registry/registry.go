@@ -55,6 +55,7 @@ func New() *Registry {
 
 // CreateEntity generates a new unique Entity ID, registers it as the child of the given parent, and returns it.
 // If no parent is specified, and there is no root, the new entity becomes the root.
+// A transform component is automatically created for the new entity.
 func (r *Registry) Create(parent entity.Entity) (entity.Entity, error) {
 	// check if parent exists
 	if _, ok := r.hierarchy.Get(parent); !ok {
@@ -69,6 +70,11 @@ func (r *Registry) Create(parent entity.Entity) (entity.Entity, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 	r.hierarchy.AddChild(parent, newEntity)
+
+	// create transform component
+	if err := r.Transform.Add(component.NewTransform(newID, newEntity, 0, 0)); err != nil {
+		return entity.Entity(0), err
+	}
 
 	return newEntity, nil
 }

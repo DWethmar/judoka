@@ -22,9 +22,15 @@ type StoreOption[T component.Component] func(*Store[T])
 // New creates a new instance of a Store for the specified component type.
 // It initializes the internal map that will hold the entity-component associations.
 func NewStore[T component.Component](options ...StoreOption[T]) *Store[T] {
-	return &Store[T]{
+	s := &Store[T]{
 		store: make(map[entity.Entity][]T),
 	}
+
+	for _, option := range options {
+		option(s)
+	}
+
+	return s
 }
 
 // GetAllEntities returns a sorted slice of all entity identifiers present in the store.

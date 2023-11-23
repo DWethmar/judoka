@@ -67,11 +67,6 @@ func AddPlayer(r *registry.Registry) entity.Entity {
 		log.Fatal(err)
 	}
 
-	transform := component.NewTransform(0, e, 4810, 2000)
-	if err := r.Transform.Add(transform); err != nil {
-		log.Fatal(err)
-	}
-
 	velocity := component.NewVelocity(0, e, 0, 0)
 	if err := r.Velocity.Add(velocity); err != nil {
 		log.Fatal(err)
@@ -94,11 +89,6 @@ func AddPlayer(r *registry.Registry) entity.Entity {
 func AddTestEntity2(r *registry.Registry, p entity.Entity) entity.Entity {
 	e, err := r.Create(p)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	transform := component.NewTransform(0, e, 100, 100)
-	if err := r.Transform.Add(transform); err != nil {
 		log.Fatal(err)
 	}
 

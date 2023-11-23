@@ -10,7 +10,7 @@ const ChunkType = "Chunk"
 type Chunk struct {
 	CID     uint32
 	CEntity entity.Entity
-	X, Y    int
+	X, Y    int // for debugging
 	Tiles   matrix.Matrix
 }
 
