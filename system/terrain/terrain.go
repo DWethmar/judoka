@@ -2,10 +2,12 @@ package terrain
 
 import (
 	"fmt"
+	"image"
 	"log/slog"
 
 	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
+	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
@@ -81,6 +83,73 @@ func (s *System) Draw(screen *ebiten.Image) error {
 	return nil
 }
 
+func (s *System) GenerateChunk(chunkX, chunkY int) error {
+	if s.level.GetChunk(chunkX, chunkY) != nil {
+		return nil
+	}
+
+	e, err := s.registry.Create(s.registry.Root())
+	if err != nil {
+		return fmt.Errorf("failed to create chunk in registry: %w", err)
+	}
+
+	// Create chunk
+	c := component.NewChunk(0, e)
+	c.X = chunkX
+	c.Y = chunkY
+	c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
+
+	if err := s.registry.Chunk.Add(c); err != nil {
+		return fmt.Errorf("failed to add chunk: %w", err)
+	}
+
+	s.level.SetChunk(chunkX, chunkY, c.Tiles)
+
+	return nil
+}
+
+func (s *System) DrawChunk(e entity.Entity, screen *ebiten.Image) error {
+	c, ok := s.registry.Chunk.First(e)
+	if !ok {
+		return fmt.Errorf("failed to get chunk")
+	}
+
+	x := c.X * ChunkSize * TileSize
+	y := c.Y * ChunkSize * TileSize
+
+	for i := 0; i < ChunkSize; i++ {
+		for j := 0; j < ChunkSize; j++ {
+			tile := c.Tiles.Get(i, j)
+
+			image := Shapes(ChunkSize*c.X+i, ChunkSize*c.Y+j, s.level)
+			if image == nil {
+				// skip drawing
+				goto drawdebug
+			}
+
+			{
+				w := image.Bounds().Max.X - image.Bounds().Min.X
+				h := image.Bounds().Max.Y - image.Bounds().Min.Y
+
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
+				op.GeoM.Translate(float64(x+i*TileSize), float64(y+j*TileSize))
+				screen.DrawImage(image, op)
+			}
+		drawdebug:
+			// tile number
+			dx := (x + i*TileSize)
+			dy := (y + j*TileSize)
+			text.Draw(screen, fmt.Sprintf("T%d\nX%d\nY%d", tile, x+i, y+j), assets.GetVGAFonts(1), dx, dy+12, colornames.Yellow700)
+		}
+	}
+
+	// draw chunk x, y
+	text.Draw(screen, fmt.Sprintf("%d, %d", c.X, c.Y), assets.GetVGAFonts(3), x+40, y+40, colornames.Blue100)
+
+	return nil
+}
+
 // Update implements system.System.
 func (s *System) Update() error {
 	for _, e := range s.registry.Actor.Entities() {
@@ -89,25 +158,8 @@ func (s *System) Update() error {
 		chunkX := (x / system.PositionResolution) / (ChunkSize * TileSize)
 		chunkY := (y / system.PositionResolution) / (ChunkSize * TileSize)
 
-		c := s.level.GetChunk(chunkX, chunkY)
-		if c == nil {
-			// create chunk
-			e, err := s.registry.Create(s.registry.Root())
-			if err != nil {
-				return fmt.Errorf("failed to create chunk: %w", err)
-			}
-
-			c := component.NewChunk(0, e)
-			c.X = chunkX
-			c.Y = chunkY
-			// c.Tiles = Generate(image.Rect(chunkX*ChunkSize, chunkY*ChunkSize, chunkX*ChunkSize+ChunkSize, chunkY*ChunkSize+ChunkSize))
-			c.Tiles = TestChunk2()
-
-			if err := s.registry.Chunk.Add(c); err != nil {
-				return fmt.Errorf("failed to add chunk: %w", err)
-			}
-
-			s.level.SetChunk(chunkX, chunkY, c.Tiles)
+		if err := s.GenerateChunk(chunkX, chunkY); err != nil {
+			return fmt.Errorf("failed to generate chunk: %w", err)
 		}
 	}
 

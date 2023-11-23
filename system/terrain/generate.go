@@ -59,11 +59,13 @@ func TestChunk2() matrix.Matrix {
 
 	// 4x4
 	var x, y int = 6, 8
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
 			m.Set(x+i, y+j, 1)
 		}
 	}
+
+	m.Set(8, 7, 1)
 
 	return m
 }

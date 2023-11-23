@@ -129,10 +129,24 @@ const (
 
 	// T shaped tiles, These tiles can be used to create T shaped lines.
 
-	// EastSouthWestEdges is a tile that has edges on the east, south and west side.
+	// EastSouthWestEdges is a T shaped tile that has edges on the east, south and west side.
 	//	000
 	//	1X1
 	//	010
 	EastSouthWestEdges = 0b01011000
-	//
+	// NorthEastWest is a T shaped tile that has edges on the north, east and west side.
+	//	010
+	//	1X1
+	//	000
+	NorthEastWestEdges = 0b00011010
+	// NorthSouthWestEdges is a T shaped tile that has edges on the north, south and west side.
+	//	010
+	//	1X0
+	//	010
+	NorthSouthWestEdges = 0b01001010
+	// NorthEastSouthEdges is a T shaped tile that has edges on the north, east and south side.
+	//	010
+	//	0X1
+	//	010
+	NorthEastSouthEdges = 0b01010010
 )
