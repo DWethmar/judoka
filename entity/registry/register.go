@@ -53,6 +53,11 @@ func New() *Register {
 	}
 }
 
+// List returns a list of all entities in the registry. Sorted by its hierarchy.
+func (r *Register) List() []entity.Entity {
+	return hierarchy.Walk(r.hierarchy, r.Root())
+}
+
 // CreateEntity generates a new unique Entity ID, registers it as the child of the given parent, and returns it.
 // If no parent is specified, and there is no root, the new entity becomes the root.
 // A transform component is automatically created for the new entity.

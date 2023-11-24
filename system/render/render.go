@@ -3,6 +3,8 @@ package render
 import (
 	"log/slog"
 
+	"github.com/dwethmar/judoka/component"
+	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/system"
 	"github.com/dwethmar/judoka/transform"
@@ -42,23 +44,38 @@ func (s *System) Init() error {
 
 // Draw implements system.System.
 func (r *System) Draw(screen *ebiten.Image) error {
+	spriteLookup := map[entity.Entity][]*component.Sprite{}
+
 	for _, e := range r.register.Sprite.Entities() {
-		x, y := transform.Position(r.register, e)
-
 		for _, sprite := range r.register.Sprite.List(e) {
-			nX := x / r.positionResolution
-			nY := y / r.positionResolution
+			spriteLookup[e] = append(spriteLookup[e], sprite)
+		}
+	}
 
-			x := float64(nX + sprite.OffsetX)
-			y := float64(nY + sprite.OffsetY)
-
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(x, y)
-			screen.DrawImage(sprite.Image, op)
+	for _, e := range r.register.List() {
+		sprites, ok := spriteLookup[e]
+		if !ok {
+			continue
+		}
+		x, y := transform.Position(r.register, e)
+		for _, sprite := range sprites {
+			r.drawSprite(screen, x, y, sprite)
 		}
 	}
 
 	return nil
+}
+
+func (r *System) drawSprite(screen *ebiten.Image, x, y int, sprite *component.Sprite) {
+	nX := x / r.positionResolution
+	nY := y / r.positionResolution
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(
+		float64(nX+sprite.OffsetX),
+		float64(nY+sprite.OffsetY),
+	)
+	screen.DrawImage(sprite.Image, op)
 }
 
 // Update implements system.System.

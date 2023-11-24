@@ -34,6 +34,7 @@ func New(opt Options) *System {
 
 func (m *System) Init(root entity.Entity) error {
 	m.root = root
+	AddPlayer(m.register, root)
 	return nil
 }
 

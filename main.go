@@ -5,9 +5,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/dwethmar/judoka/assets"
-	"github.com/dwethmar/judoka/component"
-	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/game"
 	"github.com/dwethmar/judoka/system"
@@ -35,8 +32,6 @@ func main() {
 
 	// register
 	register := registry.New()
-	AddPlayer(register)
-	// AddTestEntity2(registry, p)
 
 	// logger
 	opts := &slog.HandlerOptions{
@@ -97,48 +92,4 @@ func main() {
 	); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func AddPlayer(r *registry.Register) entity.Entity {
-	e, err := r.Create(r.Root())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	velocity := component.NewVelocity(0, e, 0, 0)
-	if err := r.Velocity.Add(velocity); err != nil {
-		log.Fatal(err)
-	}
-
-	controller := component.NewController(0, e)
-	if err := r.Controller.Add(controller); err != nil {
-		log.Fatal(err)
-	}
-
-	actor := component.NewActor(0, e)
-	actor.ActorType = component.ActorTypePlayer
-	if err := r.Actor.Add(actor); err != nil {
-		log.Fatal(err)
-	}
-
-	return e
-}
-
-func AddTestEntity2(r *registry.Register, p entity.Entity) entity.Entity {
-	e, err := r.Create(p)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	velocity := component.NewVelocity(0, e, 0, 0)
-	if err := r.Velocity.Add(velocity); err != nil {
-		log.Fatal(err)
-	}
-
-	sprite := component.NewSprite(0, e, 0, 0, assets.SkeletonKill6)
-	if err := r.Sprite.Add(sprite); err != nil {
-		log.Fatal(err)
-	}
-
-	return e
 }
