@@ -29,4 +29,18 @@ var GrassShapes = map[int]*ebiten.Image{
 	tilebitmasking.NorthEastWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[4][2]).(*ebiten.Image),
 	tilebitmasking.NorthSouthWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[6][2]).(*ebiten.Image),
 	tilebitmasking.NorthEastSouthEdges: assets.TerrainImg.SubImage(assets.TerrainCells[5][2]).(*ebiten.Image),
+
+	tilebitmasking.NorthwestNorthEastSoutheastSouthSouthWestWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[0][3]).(*ebiten.Image),
+	tilebitmasking.NorthNortheastEastSoutheastSouthSouthWestWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[1][3]).(*ebiten.Image),
+	tilebitmasking.NorthwestNorthNorthEastEastSouthSouthwestWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[2][3]).(*ebiten.Image),
+	tilebitmasking.NorthwestNorthNortheastEastSoutheastSouthWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[3][3]).(*ebiten.Image),
+
+	tilebitmasking.EastSoutheastSouthWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[8][0]).(*ebiten.Image),
+	tilebitmasking.NorthSouthSouthwestEastEdges: assets.TerrainImg.SubImage(assets.TerrainCells[9][0]).(*ebiten.Image),
+	tilebitmasking.NorthEastSoutheastSouthEdges: assets.TerrainImg.SubImage(assets.TerrainCells[10][0]).(*ebiten.Image),
+	tilebitmasking.NorthNortheastEastWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[11][0]).(*ebiten.Image),
+	tilebitmasking.EastSouthSouthwestWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[8][1]).(*ebiten.Image),
+	tilebitmasking.NorthwestNorthSouthWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[9][1]).(*ebiten.Image),
+	tilebitmasking.NorthNorthEastEastSouthEdges: assets.TerrainImg.SubImage(assets.TerrainCells[10][1]).(*ebiten.Image),
+	tilebitmasking.NorthwestNorthEastWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[11][1]).(*ebiten.Image),
 }

@@ -15,29 +15,6 @@ const (
 	//	000
 	NoEdges = 0b00000000
 
-	// Edge Tiles, These tiles have one edge that differs from the central tile.
-
-	// // NorthEdge is a tile with a different north edge
-	// //	101
-	// //	1X1
-	// //	111
-	// NorthEdge = 0b11111101
-	// // EdgeRight is a tile with a different east edge
-	// //	111
-	// //	1X0
-	// //	111
-	// EastEdge = 0b11101111
-	// // SouthEdge is a tile with a different south edge
-	// //	111
-	// //	1X1
-	// //	101
-	// SouthEdge = 0b10111111
-	// // WestEdge is a tile with a different west edge
-	// //	111
-	// //	0X1
-	// //	111
-	// WestEdge = 0b11110111
-
 	// Multiple edge Tiles, These tiles have three edges on the same side that differs from the central tile.
 
 	// EastSoutheastSouthSouthwestWest is a tile that has edges on the east, south and west side that differs from the central tile.
@@ -149,4 +126,77 @@ const (
 	//	0X1
 	//	010
 	NorthEastSouthEdges = 0b01010010
+
+	// inward corners, These tiles can be used to create inward corners.
+
+	// NorthwestNorthEastSoutheastSouthSouthWestWestEdges is a tile that has edges on the north, east, south and west side, but not on the north-east side.
+	//	110
+	//	1X1
+	//	111
+	NorthwestNorthEastSoutheastSouthSouthWestWestEdges = 0b11111011
+	// NorthNortheastEastSoutheastSouthSouthWestWestEdges is a tile that has edges on the north, east, south and west side, but not on the north-west side.
+	//	011
+	//	1X1
+	//	111
+	NorthNortheastEastSoutheastSouthSouthWestWestEdges = 0b11111110
+	// NorthwestNorthNorthEastEastSouthSouthwestWestEdges is a tile that has edges on the north, east, south and west side, but not on the south-east side.
+	//	111
+	//	1X1
+	//	110
+	NorthwestNorthNorthEastEastSouthSouthwestWestEdges = 0b01111111
+	// NorthwestNorthNortheastEastSoutheastSouthWestEdges is a tile that has edges on the north, east, south and west side, but not on the south-west side.
+	//	111
+	//	1X1
+	//	011
+	NorthwestNorthNortheastEastSoutheastSouthWestEdges = 0b11011111
+
+	// inward corner on edges. This combines the inward corner with an edge.
+
+	// EastSoutheastSouthWestEdges is a tile that has edges on the north side and south west size.
+	//	000
+	//	1X1
+	//	011
+	EastSoutheastSouthWestEdges = 0b11011000
+
+	// NorthSouthSouthwestEastEdges is a tile that has edges on the north west, and east side
+	//	010
+	//	1X0
+	//	110
+	NorthSouthSouthwestEastEdges = 0b01101010
+
+	// NorthEastSoutheastSouthEdges is a tile that has edges on the west side and north east.
+	//	010
+	//	0X1
+	//	011
+	NorthEastSoutheastSouthEdges = 0b11010010
+
+	// NorthNortheastEastWestEdges is a tile that has edges on the north west and south side.
+	//	011
+	//	1x1
+	//	000
+	NorthNortheastEastWestEdges = 0b00011110
+
+	// EastSouthSouthwestWestEdges is a tile that has edges on the north side and south east.
+	//	000
+	//	1X1
+	//	110
+	EastSouthSouthwestWestEdges = 0b01111000
+
+	// NorthwestNorthSouthWestEdges is a tile that has edges on east side and south west.
+	//	110
+	//	1X0
+	//	010
+	NorthwestNorthSouthWestEdges = 0b01001011
+
+	// NorthNorthEastEastSouthEdges is a tile that has edges on the north west and south east.
+	//	011
+	//	0X1
+	//	010
+	NorthNorthEastEastSouthEdges = 0b01010110
+
+	// NorthwestNorthEastWestEdges is a tile that has edges on the south side and north east.
+	//	110
+	//	1X1
+	//	000
+	NorthwestNorthEastWestEdges = 0b00011011
 )

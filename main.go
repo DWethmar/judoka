@@ -67,6 +67,11 @@ func AddPlayer(r *registry.Registry) entity.Entity {
 		log.Fatal(err)
 	}
 
+	if t, ok := r.Transform.First(e); ok {
+		t.X = 500 * system.PositionResolution
+		t.Y = 200 * system.PositionResolution
+	}
+
 	velocity := component.NewVelocity(0, e, 0, 0)
 	if err := r.Velocity.Add(velocity); err != nil {
 		log.Fatal(err)

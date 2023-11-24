@@ -49,7 +49,7 @@ func getTileImage(currentTile int, bitmask int) *ebiten.Image {
 }
 
 func Shapes(x, y int, l *level.Level) *ebiten.Image {
-	if x == 4 && y == 0 {
+	if x == 1 && y == 8 {
 		fmt.Println("debugger")
 	}
 	neighbors := getNeighbors(x, y, l)
