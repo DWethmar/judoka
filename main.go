@@ -15,6 +15,7 @@ import (
 	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
 	"github.com/dwethmar/judoka/system/terrain"
+	"github.com/dwethmar/judoka/system/terrain/perlin"
 	"github.com/dwethmar/judoka/system/velocity"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -47,7 +48,7 @@ func main() {
 	var systems []system.System = []system.System{
 		input.New(logger, registry),
 		// drawing systems
-		terrain.New(logger, registry),
+		terrain.New(logger, registry, perlin.New()),
 		render.New(logger, registry),
 		// other systems
 		velocity.New(logger, registry),

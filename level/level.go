@@ -1,20 +1,21 @@
 package level
 
-import "github.com/dwethmar/judoka/matrix"
+import "github.com/dwethmar/judoka/component"
 
+// Level is a collection of chunks. It is used to link chunks together.
 type Level struct {
-	Chunks    map[int]map[int]matrix.Matrix
+	Chunks    map[int]map[int]*component.Chunk
 	ChunkSize int
 }
 
 func New(size int) *Level {
 	return &Level{
-		Chunks:    make(map[int]map[int]matrix.Matrix),
+		Chunks:    make(map[int]map[int]*component.Chunk),
 		ChunkSize: size,
 	}
 }
 
-func (l *Level) GetChunk(chunkX, chunkY int) matrix.Matrix {
+func (l *Level) Chunk(chunkX, chunkY int) *component.Chunk {
 	if l.Chunks[chunkX] == nil {
 		return nil
 	}
@@ -22,35 +23,35 @@ func (l *Level) GetChunk(chunkX, chunkY int) matrix.Matrix {
 	return l.Chunks[chunkX][chunkY]
 }
 
-func (l *Level) SetChunk(chunkX, chunkY int, m matrix.Matrix) {
-	if l.Chunks[chunkX] == nil {
-		l.Chunks[chunkX] = make(map[int]matrix.Matrix)
+func (l *Level) SetChunk(c *component.Chunk) {
+	if l.Chunks[c.X] == nil {
+		l.Chunks[c.X] = make(map[int]*component.Chunk)
 	}
-	l.Chunks[chunkX][chunkY] = m
+	l.Chunks[c.X][c.Y] = c
 }
 
-func (l *Level) GetTile(x, y int) int {
+func (l *Level) Tile(x, y int) int {
 	chunkX, tileX := divMod(x, l.ChunkSize)
 	chunkY, tileY := divMod(y, l.ChunkSize)
 
-	c := l.GetChunk(chunkX, chunkY)
-	if c == nil {
+	c := l.Chunk(chunkX, chunkY)
+	if c == nil || c.Tiles == nil {
 		return 0
 	}
 
-	return c.Get(tileX, tileY)
+	return c.Tiles.Get(tileX, tileY)
 }
 
 func (l *Level) SetTile(x, y, v int) {
 	chunkX, tileX := divMod(x, l.ChunkSize)
 	chunkY, tileY := divMod(y, l.ChunkSize)
 
-	c := l.GetChunk(chunkX, chunkY)
+	c := l.Chunk(chunkX, chunkY)
 	if c == nil {
 		return
 	}
 
-	c.Set(tileX, tileY, v)
+	c.Tiles.Set(tileX, tileY, v)
 }
 
 // divMod performs integer division and modulo with support for negative numbers.
