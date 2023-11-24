@@ -66,6 +66,9 @@ func TestChunk2(chunkX, chunkY int) matrix.Matrix {
 			}
 		}
 
+		// punch a hole
+		m.Set(9, 9, 0)
+
 		// 5x5 extrusions
 		m.Set(9, 6, 1)  // north
 		m.Set(12, 9, 1) // east

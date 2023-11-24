@@ -157,46 +157,62 @@ const (
 	//	1X1
 	//	011
 	EastSoutheastSouthWestEdges = 0b11011000
-
 	// NorthSouthSouthwestEastEdges is a tile that has edges on the north west, and east side
 	//	010
 	//	1X0
 	//	110
 	NorthSouthSouthwestEastEdges = 0b01101010
-
 	// NorthEastSoutheastSouthEdges is a tile that has edges on the west side and north east.
 	//	010
 	//	0X1
 	//	011
 	NorthEastSoutheastSouthEdges = 0b11010010
-
 	// NorthNortheastEastWestEdges is a tile that has edges on the north west and south side.
 	//	011
 	//	1x1
 	//	000
 	NorthNortheastEastWestEdges = 0b00011110
-
 	// EastSouthSouthwestWestEdges is a tile that has edges on the north side and south east.
 	//	000
 	//	1X1
 	//	110
 	EastSouthSouthwestWestEdges = 0b01111000
-
 	// NorthwestNorthSouthWestEdges is a tile that has edges on east side and south west.
 	//	110
 	//	1X0
 	//	010
 	NorthwestNorthSouthWestEdges = 0b01001011
-
 	// NorthNorthEastEastSouthEdges is a tile that has edges on the north west and south east.
 	//	011
 	//	0X1
 	//	010
 	NorthNorthEastEastSouthEdges = 0b01010110
-
 	// NorthwestNorthEastWestEdges is a tile that has edges on the south side and north east.
 	//	110
 	//	1X1
 	//	000
 	NorthwestNorthEastWestEdges = 0b00011011
+
+	// double inward corners. This combines the two inward corners on the same side.
+
+	// NorthEastSouthEastSouthSouthwestWestEdges is a tile that has alls edges except the north west and north east.
+	//	010
+	//	1X1
+	//	111
+	NorthEastSouthEastSouthSouthwestWestEdges = 0b11111010
+	// NorthwestNorthEastSouthSouthwestWestEdges is a tile that has alls edges except the north east and south east.
+	//	110
+	//	1X1
+	//	110
+	NorthwestNorthEastSouthSouthwestWestEdges = 0b01111011
+	// NorthNortheastEastSoutheastSouthWestEdges is a tile that has alls edges except the north west and south west.
+	//	011
+	//	1X1
+	//	011
+	NorthNortheastEastSoutheastSouthWestEdges = 0b11011110
+	// NorthwestNorthNortheastEastSouthWestEdges is a tile that has alls edges except the north west and south east.
+	//	111
+	//	1X1
+	//	010
+	NorthwestNorthNortheastEastSouthWestEdges = 0b01011111
 )

@@ -43,4 +43,9 @@ var GrassShapes = map[int]*ebiten.Image{
 	tilebitmasking.NorthwestNorthSouthWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[9][1]).(*ebiten.Image),
 	tilebitmasking.NorthNorthEastEastSouthEdges: assets.TerrainImg.SubImage(assets.TerrainCells[10][1]).(*ebiten.Image),
 	tilebitmasking.NorthwestNorthEastWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[11][1]).(*ebiten.Image),
+
+	tilebitmasking.NorthEastSouthEastSouthSouthwestWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[8][2]).(*ebiten.Image),
+	tilebitmasking.NorthwestNorthEastSouthSouthwestWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[9][2]).(*ebiten.Image),
+	tilebitmasking.NorthNortheastEastSoutheastSouthWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[10][2]).(*ebiten.Image),
+	tilebitmasking.NorthwestNorthNortheastEastSouthWestEdges: assets.TerrainImg.SubImage(assets.TerrainCells[11][2]).(*ebiten.Image),
 }
