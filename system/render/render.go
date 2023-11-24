@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/dwethmar/judoka/component"
@@ -11,13 +12,18 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	MaxLayers = 5
+)
+
 var _ system.System = (*System)(nil)
 
 // System is a render system.
 type System struct {
 	logger             *slog.Logger
 	register           *registry.Register
-	positionResolution int // used to divide X and Y positions
+	positionResolution int                           // used to divide X and Y positions
+	layerSorters       map[int]func([]entity.Entity) // used to sort entities in layers
 }
 
 // Options are used to configure a new render system.
@@ -25,6 +31,7 @@ type Options struct {
 	Logger             *slog.Logger
 	Register           *registry.Register
 	PositionResolution int
+	LayerSorters       map[int]func([]entity.Entity)
 }
 
 // New creates a new Render system.
@@ -44,26 +51,56 @@ func (s *System) Init() error {
 
 // Draw implements system.System.
 func (r *System) Draw(screen *ebiten.Image) error {
-	spriteLookup := map[entity.Entity][]*component.Sprite{}
+	layers := make([][]entity.Entity, MaxLayers)
 
 	for _, e := range r.register.Sprite.Entities() {
-		for _, sprite := range r.register.Sprite.List(e) {
-			spriteLookup[e] = append(spriteLookup[e], sprite)
+		layer := 0
+		if l, ok := r.register.Layer.First(e); ok {
+			layer = l.Index
 		}
+
+		// check if out of bounds
+		if layer < 0 {
+			return fmt.Errorf("layer is smaller than 0: %d", layer)
+		}
+
+		if layer >= MaxLayers {
+			return fmt.Errorf("layer is bigger than max layers(%d): %d", MaxLayers, layer)
+		}
+
+		if layers[layer] == nil {
+			layers[layer] = []entity.Entity{}
+		}
+
+		layers[layer] = append(layers[layer], e)
 	}
 
-	for _, e := range r.register.List() {
-		sprites, ok := spriteLookup[e]
-		if !ok {
+	for layer, entities := range layers {
+		if len(entities) == 0 {
 			continue
 		}
-		x, y := transform.Position(r.register, e)
-		for _, sprite := range sprites {
-			r.drawSprite(screen, x, y, sprite)
+
+		// sort entities
+		if len(entities) > 0 {
+			if sorter, ok := r.layerSorters[layer]; ok {
+				sorter(entities)
+			}
 		}
+
+		r.DrawEntities(screen, entities)
 	}
 
 	return nil
+}
+
+// DrawEntities draws a layer.
+func (r *System) DrawEntities(screen *ebiten.Image, entities []entity.Entity) {
+	for _, e := range entities {
+		for _, sprite := range r.register.Sprite.List(e) {
+			x, y := transform.Position(r.register, e)
+			r.drawSprite(screen, x, y, sprite)
+		}
+	}
 }
 
 func (r *System) drawSprite(screen *ebiten.Image, x, y int, sprite *component.Sprite) {

@@ -5,6 +5,8 @@ import (
 	"github.com/dwethmar/judoka/entity/registry"
 )
 
+// Position returns the position of an entity.
+// I takes in consideration the positions of parent entities.
 func Position(r *registry.Register, e entity.Entity) (x, y int) {
 	transform, ok := r.Transform.First(e)
 	if !ok {

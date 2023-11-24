@@ -114,4 +114,23 @@ var stores = Stores{
 			}
 		},
 	),
+	Layer: NewStore[*component.Layer](
+		func(s *Store[*component.Layer]) {
+			idGen := ids.New(0)
+			s.BeforeAdd = func(c *component.Layer) error {
+				c.CID = idGen.Next()
+
+				if err := ValidateComponent(c); err != nil {
+					return err
+				}
+
+				// unique component
+				if len(s.store[c.Entity()]) > 0 {
+					return ErrUniqueConstraintFailed
+				}
+
+				return nil
+			}
+		},
+	),
 }

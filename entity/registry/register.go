@@ -21,6 +21,7 @@ type Stores struct {
 	Velocity   *Store[*component.Velocity]   // 4
 	Actor      *Store[*component.Actor]      // 5
 	Chunk      *Store[*component.Chunk]      // 6
+	Layer      *Store[*component.Layer]      // 7
 }
 
 func (s *Stores) RemoveFromStores(e entity.Entity) {
@@ -30,6 +31,7 @@ func (s *Stores) RemoveFromStores(e entity.Entity) {
 	s.Velocity.RemoveAll(e)   // 4
 	s.Actor.RemoveAll(e)      // 5
 	s.Chunk.RemoveAll(e)      // 6
+	s.Layer.RemoveAll(e)      // 7
 }
 
 // Register keeps track of all entities and their components.

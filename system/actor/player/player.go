@@ -34,7 +34,11 @@ func New(opt Options) *System {
 
 func (m *System) Init(root entity.Entity) error {
 	m.root = root
-	AddPlayer(m.register, root)
+
+	if err := AddPlayer(m.register, root); err != nil {
+		return fmt.Errorf("failed to add player: %w", err)
+	}
+
 	return nil
 }
 
