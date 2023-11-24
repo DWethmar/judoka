@@ -31,6 +31,10 @@ func New(opt Options) *System {
 	}
 }
 
+func (s *System) Init() error {
+	return nil
+}
+
 // Update implements system.System.
 func (s *System) Update() error {
 	for _, e := range s.register.Velocity.Entities() {

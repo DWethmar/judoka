@@ -56,7 +56,7 @@ func New(
 }
 
 // init initializes the system.
-func (s *System) init() error {
+func (s *System) Init() error {
 	if s.initialized {
 		return nil
 	}
@@ -79,10 +79,6 @@ func (s *System) Draw(screen *ebiten.Image) error {
 
 // Update implements system.System.
 func (s *System) Update() error {
-	if err := s.init(); err != nil {
-		return fmt.Errorf("failed to init: %w", err)
-	}
-
 	for _, e := range s.register.Actor.Entities() {
 		x, y := transform.Position(s.register, e)
 

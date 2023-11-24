@@ -37,6 +37,10 @@ func New(opt Options) *System {
 	}
 }
 
+func (s *System) Init() error {
+	return nil
+}
+
 // Draw implements system.System.
 func (*System) Draw(screen *ebiten.Image) error {
 	dx, dy := Direction()

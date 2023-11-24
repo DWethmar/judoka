@@ -36,6 +36,10 @@ func New(
 	}
 }
 
+func (s *System) Init() error {
+	return nil
+}
+
 // Draw implements system.System.
 func (r *System) Draw(screen *ebiten.Image) error {
 	for _, e := range r.register.Sprite.Entities() {

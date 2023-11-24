@@ -33,9 +33,9 @@ func main() {
 	ebiten.SetWindowSize(WindowWidth, WindowHeight)
 	ebiten.SetWindowTitle("Judoka")
 
-	// registry
-	registry := registry.New()
-	AddPlayer(registry)
+	// register
+	register := registry.New()
+	AddPlayer(register)
 	// AddTestEntity2(registry, p)
 
 	// logger
@@ -52,39 +52,44 @@ func main() {
 	var systems []system.System = []system.System{
 		input.New(input.Options{
 			Logger:             logger,
-			Register:           registry,
+			Register:           register,
 			PositionResolution: PositionResolution,
 		}),
 		// drawing systems
 		terrain.New(terrain.Options{
 			Logger:             logger,
-			Register:           registry,
+			Register:           register,
 			PositionResolution: PositionResolution,
 			Generator:          terrainGenerator,
 		}),
 		render.New(render.Options{
 			Logger:             logger,
-			Register:           registry,
+			Register:           register,
 			PositionResolution: PositionResolution,
 		}),
 		// other systems
 		velocity.New(velocity.Options{
 			Logger:   logger,
-			Register: registry,
+			Register: register,
 		}),
 		actor.New(actor.Options{
 			Logger:             logger,
-			Register:           registry,
+			Register:           register,
 			PositionResolution: PositionResolution,
-			Managers: map[component.ActorType]actor.Manager{
-				component.ActorTypePlayer: player.New(
-					player.Options{
-						Logger:   logger,
-						Registry: registry,
-					},
-				),
+			ActorSubSystems: []actor.SubSystem{
+				player.New(player.Options{
+					Logger:   logger,
+					Register: register,
+				}),
 			},
 		}),
+	}
+
+	// init systems
+	for _, s := range systems {
+		if err := s.Init(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if err := ebiten.RunGame(
