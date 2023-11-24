@@ -12,17 +12,19 @@ import (
 	"github.com/dwethmar/judoka/game"
 	"github.com/dwethmar/judoka/system"
 	"github.com/dwethmar/judoka/system/actor"
+	"github.com/dwethmar/judoka/system/actor/player"
 	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
 	"github.com/dwethmar/judoka/system/terrain"
-	"github.com/dwethmar/judoka/system/terrain/perlin"
+	"github.com/dwethmar/judoka/system/terrain/debug"
 	"github.com/dwethmar/judoka/system/velocity"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
-	WindowWidth  = 800
-	WindowHeight = 600
+	WindowWidth        = 800
+	WindowHeight       = 600
+	PositionResolution = 10
 )
 
 func main() {
@@ -43,16 +45,46 @@ func main() {
 
 	handler := slog.NewTextHandler(os.Stdout, opts)
 	logger := slog.New(handler)
+	// terrainGenerator := perlin.New()
+	terrainGenerator := debug.New()
 
 	// systems
 	var systems []system.System = []system.System{
-		input.New(logger, registry),
+		input.New(input.Options{
+			Logger:             logger,
+			Registry:           registry,
+			PositionResolution: PositionResolution,
+		}),
 		// drawing systems
-		terrain.New(logger, registry, perlin.New()),
-		render.New(logger, registry),
+		terrain.New(terrain.Options{
+			Logger:             logger,
+			Registry:           registry,
+			PositionResolution: PositionResolution,
+			Generator:          terrainGenerator,
+		}),
+		render.New(render.Options{
+			Logger:             logger,
+			Registry:           registry,
+			PositionResolution: PositionResolution,
+		}),
 		// other systems
-		velocity.New(logger, registry),
-		actor.New(logger, registry),
+		velocity.New(velocity.Options{
+			Logger:   logger,
+			Registry: registry,
+		}),
+		actor.New(actor.Options{
+			Logger:             logger,
+			Registry:           registry,
+			PositionResolution: PositionResolution,
+			Managers: map[component.ActorType]actor.Manager{
+				component.ActorTypePlayer: player.New(
+					player.Options{
+						Logger:   logger,
+						Registry: registry,
+					},
+				),
+			},
+		}),
 	}
 
 	if err := ebiten.RunGame(
@@ -66,11 +98,6 @@ func AddPlayer(r *registry.Registry) entity.Entity {
 	e, err := r.Create(r.Root())
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if t, ok := r.Transform.First(e); ok {
-		t.X = 500 * system.PositionResolution
-		t.Y = 200 * system.PositionResolution
 	}
 
 	velocity := component.NewVelocity(0, e, 0, 0)

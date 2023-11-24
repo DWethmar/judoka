@@ -16,15 +16,24 @@ const defaultSpeed = 2
 var _ system.System = (*System)(nil)
 
 type System struct {
-	logger   *slog.Logger
-	registry *registry.Registry
+	logger             *slog.Logger
+	registry           *registry.Registry
+	PositionResolution int // used to divide X and Y positions
+}
+
+// Options are used to configure a new input system.
+type Options struct {
+	Logger             *slog.Logger
+	Registry           *registry.Registry
+	PositionResolution int
 }
 
 // New creates a new input system.
-func New(logger *slog.Logger, registry *registry.Registry) *System {
+func New(opt Options) *System {
 	return &System{
-		logger:   logger,
-		registry: registry,
+		logger:             opt.Logger,
+		registry:           opt.Registry,
+		PositionResolution: opt.PositionResolution,
 	}
 }
 
@@ -68,8 +77,8 @@ func (s *System) Update() error {
 		}
 
 		// Update position based on normalized direction
-		vel.X = int(math.Round(normalizedDx) * defaultSpeed * system.PositionResolution)
-		vel.Y = int(math.Round(normalizedDy) * defaultSpeed * system.PositionResolution)
+		vel.X = int(math.Round(normalizedDx)) * defaultSpeed * s.PositionResolution
+		vel.Y = int(math.Round(normalizedDy)) * defaultSpeed * s.PositionResolution
 
 		// update controller
 		controller, ok := s.registry.Controller.First(e)

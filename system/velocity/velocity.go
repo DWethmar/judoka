@@ -17,11 +17,17 @@ type System struct {
 	registry *registry.Registry
 }
 
+// Options are used to configure a new velocity system.
+type Options struct {
+	Logger   *slog.Logger
+	Registry *registry.Registry
+}
+
 // New creates a new velocity system.
-func New(logger *slog.Logger, registry *registry.Registry) *System {
+func New(opt Options) *System {
 	return &System{
-		logger:   logger,
-		registry: registry,
+		logger:   opt.Logger,
+		registry: opt.Registry,
 	}
 }
 

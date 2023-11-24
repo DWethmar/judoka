@@ -16,18 +16,26 @@ import (
 var _ system.System = &System{}
 
 type System struct {
-	logger   *slog.Logger
-	registry *registry.Registry
-	managers map[component.ActorType]Manager
+	logger             *slog.Logger
+	registry           *registry.Registry
+	PositionResolution int // used to divide X and Y positions
+	managers           map[component.ActorType]Manager
 }
 
-func New(logger *slog.Logger, registry *registry.Registry) *System {
+// Options are used to configure a new actor system.
+type Options struct {
+	Logger             *slog.Logger
+	Registry           *registry.Registry
+	PositionResolution int
+	Managers           map[component.ActorType]Manager
+}
+
+func New(opt Options) *System {
 	return &System{
-		logger:   logger.WithGroup("player"),
-		registry: registry,
-		managers: map[component.ActorType]Manager{
-			component.ActorTypePlayer: NewPlayerManager(logger, registry),
-		},
+		logger:             opt.Logger.WithGroup("player"),
+		registry:           opt.Registry,
+		PositionResolution: opt.PositionResolution,
+		managers:           opt.Managers,
 	}
 }
 
@@ -39,8 +47,8 @@ func (s *System) Draw(screen *ebiten.Image) error {
 			continue
 		}
 
-		x := transform.X / system.PositionResolution
-		y := transform.Y / system.PositionResolution
+		x := transform.X / s.PositionResolution
+		y := transform.Y / s.PositionResolution
 
 		text.Draw(screen, fmt.Sprintf("TRANS x: %d (%d), y: %d (%d)", transform.X, x, transform.Y, y), assets.GetVGAFonts(2), x, y, color.White)
 
@@ -88,10 +96,4 @@ func (s *System) Update() error {
 	}
 
 	return nil
-}
-
-func GetOffsets(image *ebiten.Image) (int, int) {
-	w := image.Bounds().Max.X - image.Bounds().Min.X
-	h := image.Bounds().Max.Y - image.Bounds().Min.Y
-	return -(w / 2), -h
 }

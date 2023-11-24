@@ -23,25 +23,35 @@ const (
 
 var _ system.System = &System{}
 
+// System is a terrain system.
+// It is responsible for generating and drawing and linking chunks.
 type System struct {
-	initialized      bool
-	logger           *slog.Logger
-	registry         *registry.Registry
-	defaultGenerator Generator
-	level            *level.Level  // used to link chunks together
-	terrainEntity    entity.Entity // used to group all all chunk entities
+	initialized        bool
+	logger             *slog.Logger
+	registry           *registry.Registry
+	PositionResolution int // used to divide X and Y positions
+	defaultGenerator   Generator
+	level              *level.Level  // used to link chunks together
+	terrainEntity      entity.Entity // used to group all all chunk entities
+}
+
+// Options are used to configure a new terrain system.
+type Options struct {
+	Logger             *slog.Logger
+	Registry           *registry.Registry
+	PositionResolution int
+	Generator          Generator
 }
 
 func New(
-	logger *slog.Logger,
-	registry *registry.Registry,
-	generator Generator,
+	opt Options,
 ) *System {
 	return &System{
-		logger:           logger.WithGroup("terrain"),
-		registry:         registry,
-		defaultGenerator: generator,
-		level:            level.New(ChunkSize),
+		logger:             opt.Logger.WithGroup("terrain"),
+		registry:           opt.Registry,
+		PositionResolution: opt.PositionResolution,
+		defaultGenerator:   opt.Generator,
+		level:              level.New(ChunkSize),
 	}
 }
 
@@ -75,8 +85,8 @@ func (s *System) Update() error {
 	for _, e := range s.registry.Actor.Entities() {
 		x, y := transform.Position(s.registry, e)
 
-		chunkX := (x / system.PositionResolution) / (ChunkSize * TileSize)
-		chunkY := (y / system.PositionResolution) / (ChunkSize * TileSize)
+		chunkX := (x / s.PositionResolution) / (ChunkSize * TileSize)
+		chunkY := (y / s.PositionResolution) / (ChunkSize * TileSize)
 
 		// Create chunk if it does not exist
 		if s.level.Chunk(chunkX, chunkY) == nil {
@@ -92,13 +102,13 @@ func (s *System) Update() error {
 			}
 
 			// 3. Draw chunk
-			sprite, ok := s.registry.Sprite.First(c.Entity())
-			if !ok {
-				return fmt.Errorf("failed to get sprite from chunk")
+			if err := s.DrawChunk(c); err != nil {
+				return fmt.Errorf("failed to draw chunk: %w", err)
 			}
 
-			if err := s.DrawChunk(c, sprite); err != nil {
-				return fmt.Errorf("failed to draw chunk: %w", err)
+			// 4. Redraw surrounding chunks, so they connect to the new chunk
+			if err := s.RedrawNeighboringChunks(chunkX, chunkY); err != nil {
+				return fmt.Errorf("failed to redraw neighboring chunks: %w", err)
 			}
 		}
 	}
@@ -116,8 +126,8 @@ func (s *System) CreateChunk(l *level.Level, chunkX, chunkY int) (*component.Chu
 	// set position
 	t, ok := s.registry.Transform.First(e)
 	if ok {
-		t.X = (chunkX * ChunkSize * TileSize) * system.PositionResolution
-		t.Y = (chunkY * ChunkSize * TileSize) * system.PositionResolution
+		t.X = (chunkX * ChunkSize * TileSize) * s.PositionResolution
+		t.Y = (chunkY * ChunkSize * TileSize) * s.PositionResolution
 	}
 
 	// Create chunk
@@ -131,7 +141,7 @@ func (s *System) CreateChunk(l *level.Level, chunkX, chunkY int) (*component.Chu
 
 	// Add chunk to level
 	l.SetChunk(c)
-	s.logger.Info("created chunk", slog.Int("x", chunkX), slog.Int("y", chunkY))
+	s.logger.Info("created chunk", slog.Group("chunk", slog.Int("x", chunkX), slog.Int("y", chunkY)))
 
 	return c, nil
 }
@@ -154,17 +164,24 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 		return fmt.Errorf("failed to add sprite: %w", err)
 	}
 
-	s.logger.Info("generated chunk", slog.Int("x", chunkX), slog.Int("y", chunkY))
+	s.logger.Info("created chunk", slog.Group("chunk", slog.Int("x", chunkX), slog.Int("y", chunkY)))
 
 	return nil
 }
 
-func (s *System) DrawChunk(c *component.Chunk, g *component.Sprite) error {
-	if g.Image == nil {
+// DrawChunk draws a chunk to its sprite component.
+// it is required that the chunk has a sprite component.
+func (s *System) DrawChunk(c *component.Chunk) error {
+	sprite, ok := s.registry.Sprite.First(c.Entity())
+	if !ok {
+		return fmt.Errorf("failed to get sprite from chunk")
+	}
+
+	if sprite.Image == nil {
 		return fmt.Errorf("sprite image is nil")
 	}
 
-	g.Image.Clear()
+	sprite.Image.Clear()
 
 	for i := 0; i < ChunkSize; i++ { // x
 		x := i * TileSize
@@ -177,7 +194,6 @@ func (s *System) DrawChunk(c *component.Chunk, g *component.Sprite) error {
 				// skip drawing
 				goto drawdebug
 			}
-
 			{
 				w := image.Bounds().Max.X - image.Bounds().Min.X
 				h := image.Bounds().Max.Y - image.Bounds().Min.Y
@@ -185,16 +201,38 @@ func (s *System) DrawChunk(c *component.Chunk, g *component.Sprite) error {
 				op := &ebiten.DrawImageOptions{}
 				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
 				op.GeoM.Translate(float64(x), float64(y))
-				g.Image.DrawImage(image, op)
+				sprite.Image.DrawImage(image, op)
 			}
 		drawdebug:
 			wX := i + c.X*ChunkSize
 			wY := j + c.Y*ChunkSize
-			text.Draw(g.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Yellow700)
+			text.Draw(sprite.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Yellow700)
 		}
 	}
 
-	s.logger.Info("draw chunk", slog.Int("x", c.X), slog.Int("y", c.Y))
+	s.logger.Info("created chunk", slog.Group("chunk", slog.Int("x", c.X), slog.Int("y", c.Y)))
+
+	return nil
+}
+
+// RedrawNeighboringChunks redraws all existing chunks around the given chunk index.
+func (s *System) RedrawNeighboringChunks(chunkX, chunkY int) error {
+	for x := chunkX - 1; x <= chunkX+1; x++ {
+		for y := chunkY - 1; y <= chunkY+1; y++ {
+			if x == chunkX && y == chunkY {
+				continue
+			}
+
+			c := s.level.Chunk(x, y)
+			if c == nil {
+				continue
+			}
+
+			if err := s.DrawChunk(c); err != nil {
+				return fmt.Errorf("failed to draw chunk: %w", err)
+			}
+		}
+	}
 
 	return nil
 }

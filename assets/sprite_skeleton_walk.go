@@ -1,8 +1,6 @@
 package assets
 
 import (
-	"image"
-
 	_ "embed"
 	_ "image/png"
 
@@ -62,10 +60,10 @@ var (
 
 // animations
 var (
-	SkeletonMoveUpFrames    = []image.Image{}
-	SkeletonMoveLeftFrames  = []image.Image{}
-	SkeletonMoveDownFrames  = []image.Image{}
-	SkeletonMoveRightFrames = []image.Image{}
+	SkeletonMoveUpFrames    = []*ebiten.Image{}
+	SkeletonMoveLeftFrames  = []*ebiten.Image{}
+	SkeletonMoveDownFrames  = []*ebiten.Image{}
+	SkeletonMoveRightFrames = []*ebiten.Image{}
 )
 
 func init() {
@@ -117,7 +115,7 @@ func init() {
 	SkeletonRight8 = SkeletonWalkImg.SubImage(cells[7][3]).(*ebiten.Image)
 	SkeletonRight9 = SkeletonWalkImg.SubImage(cells[8][3]).(*ebiten.Image)
 
-	SkeletonMoveUpFrames = []image.Image{
+	SkeletonMoveUpFrames = []*ebiten.Image{
 		// SkeletonUp1Sprite, // idle
 		SkeletonUp2,
 		SkeletonUp3,
@@ -129,7 +127,7 @@ func init() {
 		SkeletonUp9,
 	}
 
-	SkeletonMoveLeftFrames = []image.Image{
+	SkeletonMoveLeftFrames = []*ebiten.Image{
 		// SkeletonLeft1Sprite, // idle
 		SkeletonLeft2,
 		SkeletonLeft3,
@@ -141,7 +139,7 @@ func init() {
 		SkeletonLeft9,
 	}
 
-	SkeletonMoveDownFrames = []image.Image{
+	SkeletonMoveDownFrames = []*ebiten.Image{
 		// SkeletonDown1Sprite, // idle
 		SkeletonDown2,
 		SkeletonDown3,
@@ -153,7 +151,7 @@ func init() {
 		SkeletonDown9,
 	}
 
-	SkeletonMoveRightFrames = []image.Image{
+	SkeletonMoveRightFrames = []*ebiten.Image{
 		// SkeletonRight1Sprite, // idle
 		SkeletonRight2,
 		SkeletonRight3,
