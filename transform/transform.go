@@ -5,7 +5,7 @@ import (
 	"github.com/dwethmar/judoka/entity/registry"
 )
 
-func Position(r *registry.Registry, e entity.Entity) (x, y int) {
+func Position(r *registry.Register, e entity.Entity) (x, y int) {
 	transform, ok := r.Transform.First(e)
 	if !ok {
 		return 0, 0

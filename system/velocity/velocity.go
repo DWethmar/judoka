@@ -14,32 +14,32 @@ var _ system.System = (*System)(nil)
 
 type System struct {
 	logger   *slog.Logger
-	registry *registry.Registry
+	register *registry.Register
 }
 
 // Options are used to configure a new velocity system.
 type Options struct {
 	Logger   *slog.Logger
-	Registry *registry.Registry
+	Register *registry.Register
 }
 
 // New creates a new velocity system.
 func New(opt Options) *System {
 	return &System{
 		logger:   opt.Logger,
-		registry: opt.Registry,
+		register: opt.Register,
 	}
 }
 
 // Update implements system.System.
 func (s *System) Update() error {
-	for _, e := range s.registry.Velocity.Entities() {
-		transform, ok := s.registry.Transform.First(e)
+	for _, e := range s.register.Velocity.Entities() {
+		transform, ok := s.register.Transform.First(e)
 		if !ok {
 			continue
 		}
 
-		velocity, ok := s.registry.Velocity.First(e)
+		velocity, ok := s.register.Velocity.First(e)
 		if !ok {
 			continue
 		}

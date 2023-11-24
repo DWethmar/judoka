@@ -14,14 +14,14 @@ var _ system.System = (*System)(nil)
 // System is a render system.
 type System struct {
 	logger             *slog.Logger
-	registry           *registry.Registry
+	register           *registry.Register
 	positionResolution int // used to divide X and Y positions
 }
 
 // Options are used to configure a new render system.
 type Options struct {
 	Logger             *slog.Logger
-	Registry           *registry.Registry
+	Register           *registry.Register
 	PositionResolution int
 }
 
@@ -31,17 +31,17 @@ func New(
 ) *System {
 	return &System{
 		logger:             opt.Logger,
-		registry:           opt.Registry,
+		register:           opt.Register,
 		positionResolution: opt.PositionResolution,
 	}
 }
 
 // Draw implements system.System.
 func (r *System) Draw(screen *ebiten.Image) error {
-	for _, e := range r.registry.Sprite.Entities() {
-		x, y := transform.Position(r.registry, e)
+	for _, e := range r.register.Sprite.Entities() {
+		x, y := transform.Position(r.register, e)
 
-		for _, sprite := range r.registry.Sprite.List(e) {
+		for _, sprite := range r.register.Sprite.List(e) {
 			nX := x / r.positionResolution
 			nY := y / r.positionResolution
 

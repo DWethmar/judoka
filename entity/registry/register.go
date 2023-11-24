@@ -32,9 +32,9 @@ func (s *Stores) RemoveFromStores(e entity.Entity) {
 	s.Chunk.RemoveAll(e)      // 6
 }
 
-// Registry keeps track of all entities and their components.
+// Register keeps track of all entities and their components.
 // It provides methods for entity creation and component management.
-type Registry struct {
+type Register struct {
 	Stores
 	idGenerator *ids.Generator
 	mux         sync.RWMutex
@@ -43,9 +43,9 @@ type Registry struct {
 
 // New creates and returns a new instance of Registry.
 // It initializes the entity map and the component stores.
-func New() *Registry {
+func New() *Register {
 	idGen := ids.New(0)
-	return &Registry{
+	return &Register{
 		Stores:      stores,
 		idGenerator: idGen,
 		mux:         sync.RWMutex{},
@@ -56,7 +56,7 @@ func New() *Registry {
 // CreateEntity generates a new unique Entity ID, registers it as the child of the given parent, and returns it.
 // If no parent is specified, and there is no root, the new entity becomes the root.
 // A transform component is automatically created for the new entity.
-func (r *Registry) Create(parent entity.Entity) (entity.Entity, error) {
+func (r *Register) Create(parent entity.Entity) (entity.Entity, error) {
 	// check if parent exists
 	if _, ok := r.hierarchy.Get(parent); !ok {
 		return entity.Entity(0), errors.New("parent does not exist")
@@ -80,7 +80,7 @@ func (r *Registry) Create(parent entity.Entity) (entity.Entity, error) {
 }
 
 // DeleteEntity removes an entity and all its components from the registry.
-func (r *Registry) Delete(e entity.Entity) {
+func (r *Register) Delete(e entity.Entity) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -94,12 +94,12 @@ func (r *Registry) Delete(e entity.Entity) {
 }
 
 // Root returns the root entity of the hierarchy.
-func (r *Registry) Root() entity.Entity {
+func (r *Register) Root() entity.Entity {
 	return r.hierarchy.Root().Entity
 }
 
 // Parent returns the parent of the given entity.
-func (r *Registry) Parent(e entity.Entity) (entity.Entity, bool) {
+func (r *Register) Parent(e entity.Entity) (entity.Entity, bool) {
 	if n, ok := r.hierarchy.Get(e); ok {
 		return n.Parent.Entity, true
 	}
@@ -108,7 +108,7 @@ func (r *Registry) Parent(e entity.Entity) (entity.Entity, bool) {
 }
 
 // Children returns the children of the given entity.
-func (r *Registry) Children(e entity.Entity) []entity.Entity {
+func (r *Register) Children(e entity.Entity) []entity.Entity {
 	var result []entity.Entity
 	if n, ok := r.hierarchy.Get(e); ok {
 		for _, child := range n.Children {

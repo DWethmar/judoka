@@ -17,14 +17,14 @@ var _ system.System = (*System)(nil)
 
 type System struct {
 	logger             *slog.Logger
-	registry           *registry.Registry
+	register           *registry.Register
 	PositionResolution int // used to divide X and Y positions
 }
 
 // Options are used to configure a new input system.
 type Options struct {
 	Logger             *slog.Logger
-	Registry           *registry.Registry
+	Register           *registry.Register
 	PositionResolution int
 }
 
@@ -32,7 +32,7 @@ type Options struct {
 func New(opt Options) *System {
 	return &System{
 		logger:             opt.Logger,
-		registry:           opt.Registry,
+		register:           opt.Register,
 		PositionResolution: opt.PositionResolution,
 	}
 }
@@ -49,8 +49,8 @@ func (s *System) Update() error {
 	dx, dy := Direction()
 	if dx == 0 && dy == 0 {
 		// Reset controller
-		for _, e := range s.registry.Controller.Entities() {
-			controller, ok := s.registry.Controller.First(e)
+		for _, e := range s.register.Controller.Entities() {
+			controller, ok := s.register.Controller.First(e)
 			if !ok {
 				continue
 			}
@@ -70,8 +70,8 @@ func (s *System) Update() error {
 	normalizedDy := float64(dy) / length
 
 	// Use the normalized values for transformation
-	for _, e := range s.registry.Controller.Entities() {
-		vel := s.registry.Velocity.List(e)[0]
+	for _, e := range s.register.Controller.Entities() {
+		vel := s.register.Velocity.List(e)[0]
 		if vel == nil {
 			continue
 		}
@@ -81,7 +81,7 @@ func (s *System) Update() error {
 		vel.Y = int(math.Round(normalizedDy)) * defaultSpeed * s.PositionResolution
 
 		// update controller
-		controller, ok := s.registry.Controller.First(e)
+		controller, ok := s.register.Controller.First(e)
 		if !ok {
 			continue
 		}

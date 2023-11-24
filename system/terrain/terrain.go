@@ -21,6 +21,14 @@ const (
 	TileSize  = 32
 )
 
+// Options are used to configure a new terrain system.
+type Options struct {
+	Logger             *slog.Logger
+	Register           *registry.Register
+	PositionResolution int
+	Generator          Generator
+}
+
 var _ system.System = &System{}
 
 // System is a terrain system.
@@ -28,19 +36,11 @@ var _ system.System = &System{}
 type System struct {
 	initialized        bool
 	logger             *slog.Logger
-	registry           *registry.Registry
+	register           *registry.Register
 	PositionResolution int // used to divide X and Y positions
 	defaultGenerator   Generator
 	level              *level.Level  // used to link chunks together
 	terrainEntity      entity.Entity // used to group all all chunk entities
-}
-
-// Options are used to configure a new terrain system.
-type Options struct {
-	Logger             *slog.Logger
-	Registry           *registry.Registry
-	PositionResolution int
-	Generator          Generator
 }
 
 func New(
@@ -48,19 +48,20 @@ func New(
 ) *System {
 	return &System{
 		logger:             opt.Logger.WithGroup("terrain"),
-		registry:           opt.Registry,
+		register:           opt.Register,
 		PositionResolution: opt.PositionResolution,
 		defaultGenerator:   opt.Generator,
 		level:              level.New(ChunkSize),
 	}
 }
 
+// init initializes the system.
 func (s *System) init() error {
 	if s.initialized {
 		return nil
 	}
 
-	terrainEntity, err := s.registry.Create(s.registry.Root())
+	terrainEntity, err := s.register.Create(s.register.Root())
 	if err != nil {
 		return fmt.Errorf("failed to create terrain entity: %w", err)
 	}
@@ -82,8 +83,8 @@ func (s *System) Update() error {
 		return fmt.Errorf("failed to init: %w", err)
 	}
 
-	for _, e := range s.registry.Actor.Entities() {
-		x, y := transform.Position(s.registry, e)
+	for _, e := range s.register.Actor.Entities() {
+		x, y := transform.Position(s.register, e)
 
 		chunkX := (x / s.PositionResolution) / (ChunkSize * TileSize)
 		chunkY := (y / s.PositionResolution) / (ChunkSize * TileSize)
@@ -118,13 +119,13 @@ func (s *System) Update() error {
 
 // CreateChunk creates a chunk at the given chunk position.
 func (s *System) CreateChunk(l *level.Level, chunkX, chunkY int) (*component.Chunk, error) {
-	e, err := s.registry.Create(s.terrainEntity)
+	e, err := s.register.Create(s.terrainEntity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create chunk in registry: %w", err)
 	}
 
 	// set position
-	t, ok := s.registry.Transform.First(e)
+	t, ok := s.register.Transform.First(e)
 	if ok {
 		t.X = (chunkX * ChunkSize * TileSize) * s.PositionResolution
 		t.Y = (chunkY * ChunkSize * TileSize) * s.PositionResolution
@@ -135,7 +136,7 @@ func (s *System) CreateChunk(l *level.Level, chunkX, chunkY int) (*component.Chu
 	c.X = chunkX
 	c.Y = chunkY
 
-	if err := s.registry.Chunk.Add(c); err != nil {
+	if err := s.register.Chunk.Add(c); err != nil {
 		return nil, fmt.Errorf("failed to add chunk component to chunk store: %w", err)
 	}
 
@@ -160,7 +161,7 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 	// Create sprite
 	img := ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
 	spr := component.NewSprite(0, c.Entity(), 0, 0, img)
-	if err := s.registry.Sprite.Add(spr); err != nil {
+	if err := s.register.Sprite.Add(spr); err != nil {
 		return fmt.Errorf("failed to add sprite: %w", err)
 	}
 
@@ -172,7 +173,7 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 // DrawChunk draws a chunk to its sprite component.
 // it is required that the chunk has a sprite component.
 func (s *System) DrawChunk(c *component.Chunk) error {
-	sprite, ok := s.registry.Sprite.First(c.Entity())
+	sprite, ok := s.register.Sprite.First(c.Entity())
 	if !ok {
 		return fmt.Errorf("failed to get sprite from chunk")
 	}

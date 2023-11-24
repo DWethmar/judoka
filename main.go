@@ -52,29 +52,29 @@ func main() {
 	var systems []system.System = []system.System{
 		input.New(input.Options{
 			Logger:             logger,
-			Registry:           registry,
+			Register:           registry,
 			PositionResolution: PositionResolution,
 		}),
 		// drawing systems
 		terrain.New(terrain.Options{
 			Logger:             logger,
-			Registry:           registry,
+			Register:           registry,
 			PositionResolution: PositionResolution,
 			Generator:          terrainGenerator,
 		}),
 		render.New(render.Options{
 			Logger:             logger,
-			Registry:           registry,
+			Register:           registry,
 			PositionResolution: PositionResolution,
 		}),
 		// other systems
 		velocity.New(velocity.Options{
 			Logger:   logger,
-			Registry: registry,
+			Register: registry,
 		}),
 		actor.New(actor.Options{
 			Logger:             logger,
-			Registry:           registry,
+			Register:           registry,
 			PositionResolution: PositionResolution,
 			Managers: map[component.ActorType]actor.Manager{
 				component.ActorTypePlayer: player.New(
@@ -94,7 +94,7 @@ func main() {
 	}
 }
 
-func AddPlayer(r *registry.Registry) entity.Entity {
+func AddPlayer(r *registry.Register) entity.Entity {
 	e, err := r.Create(r.Root())
 	if err != nil {
 		log.Fatal(err)
@@ -119,7 +119,7 @@ func AddPlayer(r *registry.Registry) entity.Entity {
 	return e
 }
 
-func AddTestEntity2(r *registry.Registry, p entity.Entity) entity.Entity {
+func AddTestEntity2(r *registry.Register, p entity.Entity) entity.Entity {
 	e, err := r.Create(p)
 	if err != nil {
 		log.Fatal(err)

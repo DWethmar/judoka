@@ -2,6 +2,7 @@ package registry
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 
 	"github.com/dwethmar/judoka/component"
@@ -90,6 +91,13 @@ func (ecs *Store[T]) List(e entity.Entity) []T {
 	}
 
 	return list
+}
+
+// Sort the entity.Entity identifiers in the store using the provided function.
+func (ecs *Store[T]) Sort(f func(i, j int) bool) {
+	ecs.mu.Lock()
+	defer ecs.mu.Unlock()
+	sort.Slice(ecs.order, f)
 }
 
 // Remove removes a single component associated with an entity.Entity identifier.

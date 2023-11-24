@@ -15,13 +15,13 @@ import (
 // Manager is responsible for managing a player.
 type Manager struct {
 	logger   *slog.Logger
-	registry *registry.Registry
+	registry *registry.Register
 }
 
 // Options are used to configure a new player manager.
 type Options struct {
 	Logger   *slog.Logger
-	Registry *registry.Registry
+	Registry *registry.Register
 }
 
 func New(opt Options) *Manager {
