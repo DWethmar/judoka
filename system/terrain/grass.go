@@ -17,13 +17,17 @@ var GrassShapes = map[int]*ebiten.Image{
 	tilebitmasking.SouthSouthwestWestEdges:          assets.TerrainImg.SubImage(assets.TerrainCells[0][1]).(*ebiten.Image),
 	tilebitmasking.NorthwestNorthWestEdges:          assets.TerrainImg.SubImage(assets.TerrainCells[2][1]).(*ebiten.Image),
 	tilebitmasking.NorthNortheastEastEdges:          assets.TerrainImg.SubImage(assets.TerrainCells[3][1]).(*ebiten.Image),
-	tilebitmasking.HorizontalAndVerticalEdges:       assets.TerrainImg.SubImage(assets.TerrainCells[2][0]).(*ebiten.Image), //
-	tilebitmasking.SouthEdge:                        assets.TerrainImg.SubImage(assets.TerrainCells[0][2]).(*ebiten.Image), //
-	tilebitmasking.WestEdge:                         assets.TerrainImg.SubImage(assets.TerrainCells[1][2]).(*ebiten.Image),
-	tilebitmasking.NorthEdge:                        assets.TerrainImg.SubImage(assets.TerrainCells[3][2]).(*ebiten.Image),
-	tilebitmasking.EastEdge:                         assets.TerrainImg.SubImage(assets.TerrainCells[2][2]).(*ebiten.Image),
-	tilebitmasking.HorizontalEdges:                  assets.TerrainImg.SubImage(assets.TerrainCells[3][0]).(*ebiten.Image),
-	tilebitmasking.VerticalEdges:                    assets.TerrainImg.SubImage(assets.TerrainCells[4][0]).(*ebiten.Image),
+
+	tilebitmasking.NorthNortheastEastSouthSouthwestWest: assets.TerrainImg.SubImage(assets.TerrainCells[6][0]).(*ebiten.Image), //
+	tilebitmasking.NorthwestNorthEastSoutheastSouthWest: assets.TerrainImg.SubImage(assets.TerrainCells[7][0]).(*ebiten.Image), //
+
+	tilebitmasking.HorizontalAndVerticalEdges: assets.TerrainImg.SubImage(assets.TerrainCells[2][0]).(*ebiten.Image), //
+	tilebitmasking.SouthEdge:                  assets.TerrainImg.SubImage(assets.TerrainCells[0][2]).(*ebiten.Image), //
+	tilebitmasking.WestEdge:                   assets.TerrainImg.SubImage(assets.TerrainCells[1][2]).(*ebiten.Image),
+	tilebitmasking.NorthEdge:                  assets.TerrainImg.SubImage(assets.TerrainCells[3][2]).(*ebiten.Image),
+	tilebitmasking.EastEdge:                   assets.TerrainImg.SubImage(assets.TerrainCells[2][2]).(*ebiten.Image),
+	tilebitmasking.HorizontalEdges:            assets.TerrainImg.SubImage(assets.TerrainCells[3][0]).(*ebiten.Image),
+	tilebitmasking.VerticalEdges:              assets.TerrainImg.SubImage(assets.TerrainCells[4][0]).(*ebiten.Image),
 
 	tilebitmasking.EastSouthWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[7][2]).(*ebiten.Image),
 	tilebitmasking.NorthEastWestEdges:  assets.TerrainImg.SubImage(assets.TerrainCells[4][2]).(*ebiten.Image),

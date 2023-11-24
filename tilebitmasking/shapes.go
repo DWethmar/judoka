@@ -60,6 +60,19 @@ const (
 	//	000
 	NorthNortheastEastEdges = 0b00010110
 
+	// Two diagonal edges, These tiles have two diagonal edges on the same axis that differs from the central tile.
+
+	// NorthNortheastEastSouthSouthwestWest is a tile that has edges on all sides except the north-west and south-east.
+	//	011
+	//	1X1
+	//	110
+	NorthNortheastEastSouthSouthwestWest = 0b01111110
+	// NorthwestNorthEastSoutheastSouthWest is a tile that has edges on all sides except the north-west and south-east.
+	// 110
+	// 1X1
+	// 011
+	NorthwestNorthEastSoutheastSouthWest = 0b11011011
+
 	// Four diagonal edges, These tiles have four diagonal edges that differs from the central tile.
 
 	// HorizontalAndVerticalEdges is a tile with different north west, north east, south east and south west edges

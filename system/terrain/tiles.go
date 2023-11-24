@@ -20,15 +20,15 @@ const (
 
 func getNeighbors(x, y int, l *level.Level) *tilebitmasking.Neighborhood {
 	return &tilebitmasking.Neighborhood{
-		NorthWest: l.Tile(x-1, y-1),
-		North:     l.Tile(x, y-1),
-		NorthEast: l.Tile(x+1, y-1),
-		West:      l.Tile(x-1, y),
-		Center:    l.Tile(x, y),
-		East:      l.Tile(x+1, y),
-		SouthWest: l.Tile(x-1, y+1),
-		South:     l.Tile(x, y+1),
-		SouthEast: l.Tile(x+1, y+1),
+		NorthWest: l.Tile(x-1, y-1, -1),
+		North:     l.Tile(x, y-1, -1),
+		NorthEast: l.Tile(x+1, y-1, -1),
+		West:      l.Tile(x-1, y, -1),
+		Center:    l.Tile(x, y, -1),
+		East:      l.Tile(x+1, y, -1),
+		SouthWest: l.Tile(x-1, y+1, -1),
+		South:     l.Tile(x, y+1, -1),
+		SouthEast: l.Tile(x+1, y+1, -1),
 	}
 }
 

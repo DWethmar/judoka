@@ -30,16 +30,18 @@ func (l *Level) SetChunk(c *component.Chunk) {
 	l.Chunks[c.X][c.Y] = c
 }
 
-func (l *Level) Tile(x, y int) int {
+// Tile returns the tile at the given position.
+// If the position does not exist, the default value is returned.
+func (l *Level) Tile(x, y, d int) int {
 	chunkX, tileX := divMod(x, l.ChunkSize)
 	chunkY, tileY := divMod(y, l.ChunkSize)
 
 	c := l.Chunk(chunkX, chunkY)
 	if c == nil || c.Tiles == nil {
-		return 0
+		return d
 	}
 
-	return c.Tiles.Get(tileX, tileY)
+	return c.Tiles.Get(tileX, tileY, d)
 }
 
 func (l *Level) SetTile(x, y, v int) {

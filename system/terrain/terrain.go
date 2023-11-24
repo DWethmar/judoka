@@ -160,13 +160,17 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 }
 
 func (s *System) DrawChunk(c *component.Chunk, g *component.Sprite) error {
+	if g.Image == nil {
+		return fmt.Errorf("sprite image is nil")
+	}
+
 	g.Image.Clear()
 
 	for i := 0; i < ChunkSize; i++ { // x
 		x := i * TileSize
 		for j := 0; j < ChunkSize; j++ { // y
 			y := j * TileSize
-			tile := c.Tiles.Get(i, j)
+			tile := c.Tiles.Get(i, j, -1)
 
 			image := Shapes(i+(ChunkSize*c.X), j+(ChunkSize*c.Y), s.level)
 			if image == nil {

@@ -2,7 +2,13 @@ package matrix
 
 type Matrix [][]int
 
-func (m Matrix) Get(x, y int) int {
+// Get returns the value at the given position.
+// If the position is out of bounds, the default value is returned.
+func (m Matrix) Get(x, y, d int) int {
+	if y < 0 || y >= len(m) {
+		return d
+	}
+
 	return m[y][x]
 }
 
