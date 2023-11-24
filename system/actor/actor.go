@@ -32,7 +32,7 @@ type Options struct {
 
 func New(opt Options) *System {
 	return &System{
-		logger:             opt.Logger.WithGroup("player"),
+		logger:             opt.Logger.WithGroup("actor"),
 		registry:           opt.Registry,
 		PositionResolution: opt.PositionResolution,
 		managers:           opt.Managers,
@@ -50,14 +50,14 @@ func (s *System) Draw(screen *ebiten.Image) error {
 		x := transform.X / s.PositionResolution
 		y := transform.Y / s.PositionResolution
 
-		text.Draw(screen, fmt.Sprintf("TRANS x: %d (%d), y: %d (%d)", transform.X, x, transform.Y, y), assets.GetVGAFonts(2), x, y, color.White)
+		text.Draw(screen, fmt.Sprintf("POS x: %d (%d), y: %d (%d)", transform.X, x, transform.Y, y), assets.GetVGAFonts(2), x, y, color.White)
 
 		velocity, ok := s.registry.Velocity.First(e)
 		if !ok {
 			continue
 		}
 
-		text.Draw(screen, fmt.Sprintf("VELOC x: %d, y: %d", velocity.X, velocity.Y), assets.GetVGAFonts(2), x, y+15, color.White)
+		text.Draw(screen, fmt.Sprintf("VEL x: %d, y: %d", velocity.X, velocity.Y), assets.GetVGAFonts(2), x, y+15, color.White)
 
 		actor, ok := s.registry.Actor.First(e)
 		if !ok {
@@ -82,11 +82,13 @@ func (s *System) Update() error {
 	for _, e := range s.registry.Actor.Entities() {
 		actor, ok := s.registry.Actor.First(e)
 		if !ok {
+			s.logger.Error("no actor found for entity (which is weird)", slog.Int("entity", int(e)))
 			continue
 		}
 
 		manager, ok := s.managers[actor.ActorType]
 		if !ok {
+			s.logger.Info("no manager found for actor type", slog.Int("actor_type", int(actor.ActorType)))
 			continue
 		}
 

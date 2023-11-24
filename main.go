@@ -16,7 +16,7 @@ import (
 	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
 	"github.com/dwethmar/judoka/system/terrain"
-	"github.com/dwethmar/judoka/system/terrain/debug"
+	"github.com/dwethmar/judoka/system/terrain/perlin"
 	"github.com/dwethmar/judoka/system/velocity"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -45,8 +45,8 @@ func main() {
 
 	handler := slog.NewTextHandler(os.Stdout, opts)
 	logger := slog.New(handler)
-	// terrainGenerator := perlin.New()
-	terrainGenerator := debug.New()
+	terrainGenerator := perlin.New()
+	// terrainGenerator := debug.New()
 
 	// systems
 	var systems []system.System = []system.System{

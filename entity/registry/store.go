@@ -2,7 +2,6 @@ package registry
 
 import (
 	"fmt"
-	"sort"
 	"sync"
 
 	"github.com/dwethmar/judoka/component"
@@ -14,16 +13,18 @@ import (
 type Store[T component.Component] struct {
 	mu        sync.RWMutex
 	store     map[entity.Entity][]T
+	order     []entity.Entity
 	BeforeAdd func(c T) error
 }
 
 type StoreOption[T component.Component] func(*Store[T])
 
-// New creates a new instance of a Store for the specified component type.
+// NewStore creates a new instance of a Store for the specified component type.
 // It initializes the internal map that will hold the entity-component associations.
 func NewStore[T component.Component](options ...StoreOption[T]) *Store[T] {
 	s := &Store[T]{
 		store: make(map[entity.Entity][]T),
+		order: make([]entity.Entity, 0),
 	}
 
 	for _, option := range options {
@@ -37,15 +38,8 @@ func NewStore[T component.Component](options ...StoreOption[T]) *Store[T] {
 func (ecs *Store[T]) Entities() []entity.Entity {
 	ecs.mu.RLock()
 	defer ecs.mu.RUnlock()
-
-	var ids []entity.Entity
-	for id := range ecs.store {
-		ids = append(ids, id)
-	}
-
-	// Sort the slice of ids
-	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
-
+	ids := make([]entity.Entity, len(ecs.order))
+	copy(ids, ecs.order)
 	return ids
 }
 
@@ -63,6 +57,8 @@ func (ecs *Store[T]) Add(c T) error {
 	}
 
 	ecs.store[c.Entity()] = append(ecs.store[c.Entity()], c)
+	ecs.order = append(ecs.order, c.Entity())
+
 	return nil
 }
 
@@ -135,4 +131,14 @@ func (ecs *Store[T]) RemoveAll(e entity.Entity) {
 	defer ecs.mu.Unlock()
 
 	delete(ecs.store, e)
+
+	// Remove the entity from the order list
+	for i, id := range ecs.order {
+		if id == e {
+			copy(ecs.order[i:], ecs.order[i+1:])
+			ecs.order[len(ecs.order)-1] = 0
+			ecs.order = ecs.order[:len(ecs.order)-1]
+			return
+		}
+	}
 }
