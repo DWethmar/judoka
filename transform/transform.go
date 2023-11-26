@@ -10,6 +10,11 @@ import (
 func Position(r *registry.Register, e entity.Entity) (x, y int) {
 	transform, ok := r.Transform.First(e)
 	if !ok {
+		// if no transform is found, check parent
+		if p, ok := r.Parent(e); ok {
+			return Position(r, p)
+		}
+
 		return 0, 0
 	}
 

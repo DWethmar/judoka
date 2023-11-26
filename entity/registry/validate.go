@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrComponentTypeEmpty   = errors.New("component type is empty")
-	ErrComponentEntityEmpty = errors.New("component entity is empty")
+	ErrComponentTypeRequied    = errors.New("component type is not set")
+	ErrComponentEntityRequired = errors.New("component entity is not set")
 )
 
 // ValidateComponent is a business rule that validates a component.
@@ -22,11 +22,11 @@ func ValidateComponent(c component.Component) error {
 	}
 
 	if c.Type() == "" {
-		return ErrComponentTypeEmpty
+		return ErrComponentTypeRequied
 	}
 
 	if c.Entity() <= 0 {
-		return ErrComponentEntityEmpty
+		return ErrComponentEntityRequired
 	}
 
 	return nil

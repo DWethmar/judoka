@@ -2,6 +2,7 @@ package registry
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/dwethmar/judoka/component"
@@ -45,14 +46,22 @@ type Register struct {
 
 // New creates and returns a new instance of Registry.
 // It initializes the entity map and the component stores.
-func New() *Register {
+func New() (*Register, error) {
 	idGen := ids.New(0)
-	return &Register{
+	root := entity.Entity(idGen.Next())
+	r := &Register{
 		Stores:      stores,
 		idGenerator: idGen,
 		mux:         sync.RWMutex{},
-		hierarchy:   hierarchy.New(entity.Entity(0)),
+		hierarchy:   hierarchy.New(root),
 	}
+
+	// create transform component
+	if err := r.Transform.Add(component.NewTransform(0, root, 0, 0)); err != nil {
+		return nil, fmt.Errorf("could not create transform component for root: %w", err)
+	}
+
+	return r, nil
 }
 
 // List returns a list of all entities in the registry. Sorted by its hierarchy.
@@ -108,6 +117,9 @@ func (r *Register) Root() entity.Entity {
 // Parent returns the parent of the given entity.
 func (r *Register) Parent(e entity.Entity) (entity.Entity, bool) {
 	if n, ok := r.hierarchy.Get(e); ok {
+		if n.Parent == nil {
+			return entity.Entity(0), false
+		}
 		return n.Parent.Entity, true
 	}
 

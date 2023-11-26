@@ -10,6 +10,7 @@ import (
 	"github.com/dwethmar/judoka/system"
 	"github.com/dwethmar/judoka/system/actor"
 	"github.com/dwethmar/judoka/system/actor/player"
+	"github.com/dwethmar/judoka/system/camera"
 	"github.com/dwethmar/judoka/system/input"
 	"github.com/dwethmar/judoka/system/render"
 	"github.com/dwethmar/judoka/system/terrain"
@@ -31,7 +32,10 @@ func main() {
 	ebiten.SetWindowTitle("Judoka")
 
 	// register
-	register := registry.New()
+	register, err := registry.New()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// logger
 	opts := &slog.HandlerOptions{
@@ -77,6 +81,12 @@ func main() {
 					Register: register,
 				}),
 			},
+		}),
+		camera.New(camera.Options{
+			Logger:             logger,
+			Register:           register,
+			PositionResolution: PositionResolution,
+			Viewport:           register.Root(),
 		}),
 	}
 

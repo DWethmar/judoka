@@ -83,27 +83,37 @@ func (s *System) Draw(screen *ebiten.Image) error {
 		x := transform.X / s.positionResolution
 		y := transform.Y / s.positionResolution
 
-		text.Draw(screen, fmt.Sprintf("POS x: %d (%d), y: %d (%d)", transform.X, x, transform.Y, y), assets.GetVGAFonts(2), x, y, color.White)
-
 		velocity, ok := s.register.Velocity.First(e)
 		if !ok {
 			continue
 		}
-
-		text.Draw(screen, fmt.Sprintf("VEL x: %d, y: %d", velocity.X, velocity.Y), assets.GetVGAFonts(2), x, y+15, color.White)
 
 		actor, ok := s.register.Actor.First(e)
 		if !ok {
 			continue
 		}
 
-		text.Draw(screen, fmt.Sprintf(`ACTOR %d
-Facing %s
-AnimationFrame: %d
+		layer := 0
+		if l, ok := s.register.Layer.First(e); ok {
+			layer = l.Index
+		}
+
+		text.Draw(screen, fmt.Sprintf(`POS x: %d (%d), y: %d (%d)
+VEL x: %d, y: %d
+ACTOR:%d
+Facing:%s
+AnimationFrame:%d
+Layer:%d
 `,
+			transform.X,
+			transform.X/s.positionResolution,
+			transform.Y,
+			transform.Y/s.positionResolution,
+			velocity.X, velocity.Y,
 			actor.ActorType,
 			actor.Facing,
 			actor.AnimationFrame,
+			layer,
 		), assets.GetVGAFonts(2), x, y+30, color.White)
 	}
 

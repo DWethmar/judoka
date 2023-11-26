@@ -38,6 +38,10 @@ func (m *System) animate(actor *component.Actor) error {
 
 	if isMoving {
 		d := direction.Get(transform.X, transform.Y, transform.X+controller.X, transform.Y+controller.Y)
+		if d != actor.Facing {
+			actor.AnimationFrame = 0
+		}
+
 		var frames []*ebiten.Image
 		switch d {
 		case direction.Top, direction.TopLeft, direction.TopRight:
