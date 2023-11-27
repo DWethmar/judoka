@@ -97,6 +97,10 @@ func (r *System) Draw(screen *ebiten.Image) error {
 func (r *System) DrawEntities(screen *ebiten.Image, entities []entity.Entity) {
 	for _, e := range entities {
 		for _, sprite := range r.register.Sprite.List(e) {
+			if sprite.Image == nil {
+				continue
+			}
+
 			x, y := transform.Position(r.register, e)
 			r.drawSprite(screen, x, y, sprite)
 		}
@@ -112,6 +116,9 @@ func (r *System) drawSprite(screen *ebiten.Image, x, y int, sprite *component.Sp
 		float64(nX+sprite.OffsetX),
 		float64(nY+sprite.OffsetY),
 	)
+
+	// filter
+	op.Filter = ebiten.FilterLinear
 	screen.DrawImage(sprite.Image, op)
 }
 

@@ -6,6 +6,7 @@ GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
+GORUN=$(GOCMD) run
 
 all: build
 
@@ -24,5 +25,5 @@ clean:
 	$(GOCLEAN)
 	rm -fr $(OUTPUT_DIR)
 
-run: build
-	./$(BINARY_NAME)
+run:
+	$(GORUN) .

@@ -12,6 +12,7 @@ var _ Component = (*Sprite)(nil)
 type Sprite struct {
 	CID              uint32
 	entity           entity.Entity
+	Name             string
 	OffsetX, OffsetY int
 	Image            *ebiten.Image
 }

@@ -33,7 +33,7 @@ func (g *Generator) Generate(minX int, maxX int, minY int, maxY int) matrix.Matr
 	w := maxX - minX
 	h := maxY - minY
 
-	scale := 20.0 // Adjust this scale factor as needed
+	scale := 10.0 // Adjust this scale factor as needed
 	p := perlin.NewPerlin(g.alpha, g.beta, g.n, g.seed)
 	m := matrix.New(w, h, 0)
 
@@ -41,7 +41,7 @@ func (g *Generator) Generate(minX int, maxX int, minY int, maxY int) matrix.Matr
 		for y := 0; y < h; y++ {
 			noiseVal := p.Noise2D(float64(minX+x)/scale, float64(minY+y)/scale)
 			normalizedVal := (noiseVal + 1) / 2
-			finalVal := normalizedVal * 5
+			finalVal := normalizedVal * 2
 			m.Set(x, y, int(finalVal))
 		}
 	}

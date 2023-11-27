@@ -5,12 +5,15 @@ import (
 	"log/slog"
 	"math"
 
+	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/exp/shiny/materialdesign/colornames"
 )
 
 const (
@@ -38,6 +41,9 @@ type System struct {
 	defaultGenerator   Generator
 	level              *level.Level  // used to link chunks together
 	terrainEntity      entity.Entity // used to group all all chunk entities
+	debug              bool          // used to draw debug info
+	waterBackground1   *ebiten.Image
+	waterBackground2   *ebiten.Image
 }
 
 func New(
@@ -49,6 +55,7 @@ func New(
 		PositionResolution: opt.PositionResolution,
 		defaultGenerator:   opt.Generator,
 		level:              level.New(ChunkSize),
+		debug:              false,
 	}
 }
 
@@ -65,6 +72,45 @@ func (s *System) Init() error {
 
 	s.terrainEntity = terrainEntity
 	s.initialized = true
+
+	// draw water background
+	s.waterBackground1 = ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
+	for i := 0; i < ChunkSize; i++ { // x
+		x := i * TileSize
+		for j := 0; j < ChunkSize; j++ { // y
+			y := j * TileSize
+
+			image := assets.WaterImg.SubImage(assets.WaterCells[0][0]).(*ebiten.Image)
+			{
+				w := image.Bounds().Dx()
+				h := image.Bounds().Dy()
+
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
+				op.GeoM.Translate(float64(x), float64(y))
+				s.waterBackground1.DrawImage(image, op)
+			}
+		}
+	}
+
+	s.waterBackground2 = ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
+	for i := 0; i < ChunkSize; i++ { // x
+		x := i * TileSize
+		for j := 0; j < ChunkSize; j++ { // y
+			y := j * TileSize
+
+			image := assets.WaterImg.SubImage(assets.WaterCells[1][0]).(*ebiten.Image)
+			{
+				w := image.Bounds().Dx()
+				h := image.Bounds().Dy()
+
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
+				op.GeoM.Translate(float64(x), float64(y))
+				s.waterBackground2.DrawImage(image, op)
+			}
+		}
+	}
 
 	return nil
 }
@@ -156,11 +202,23 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 		(chunkY*ChunkSize)+ChunkSize,
 	)
 
+	// Create background sprite
+	{
+		spr := component.NewSprite(0, c.Entity(), 0, 0, s.waterBackground1)
+		spr.Name = "background"
+		if err := s.register.Sprite.Add(spr); err != nil {
+			return fmt.Errorf("failed to add sprite: %w", err)
+		}
+	}
+
 	// Create sprite
-	img := ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
-	spr := component.NewSprite(0, c.Entity(), 0, 0, img)
-	if err := s.register.Sprite.Add(spr); err != nil {
-		return fmt.Errorf("failed to add sprite: %w", err)
+	{
+		img := ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
+		spr := component.NewSprite(0, c.Entity(), 0, 0, img)
+		spr.Name = "terrain"
+		if err := s.register.Sprite.Add(spr); err != nil {
+			return fmt.Errorf("failed to add sprite: %w", err)
+		}
 	}
 
 	s.logger.Info("created chunk", slog.Group("chunk", slog.Int("x", chunkX), slog.Int("y", chunkY)))
@@ -171,9 +229,16 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 // DrawChunk draws a chunk to its sprite component.
 // it is required that the chunk has a sprite component.
 func (s *System) DrawChunk(c *component.Chunk) error {
-	sprite, ok := s.register.Sprite.First(c.Entity())
-	if !ok {
-		return fmt.Errorf("failed to get sprite from chunk")
+	var sprite *component.Sprite
+	for _, spr := range s.register.Sprite.List(c.Entity()) {
+		if spr.Name == "terrain" {
+			sprite = spr
+			break
+		}
+	}
+
+	if sprite == nil {
+		return fmt.Errorf("sprite not found")
 	}
 
 	if sprite.Image == nil {
@@ -186,7 +251,11 @@ func (s *System) DrawChunk(c *component.Chunk) error {
 		x := i * TileSize
 		for j := 0; j < ChunkSize; j++ { // y
 			y := j * TileSize
-			// tile := c.Tiles.Get(i, j, -1)
+
+			tile := c.Tiles.Get(i, j, -1)
+			if tile <= 0 { // we skip drawing water
+				continue
+			}
 
 			image := Shapes(i+(ChunkSize*c.X), j+(ChunkSize*c.Y), s.level)
 			if image == nil {
@@ -203,9 +272,11 @@ func (s *System) DrawChunk(c *component.Chunk) error {
 				sprite.Image.DrawImage(image, op)
 			}
 		drawdebug:
-			// wX := i + c.X*ChunkSize
-			// wY := j + c.Y*ChunkSize
-			// text.Draw(sprite.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Yellow700)
+			if s.debug {
+				wX := i + c.X*ChunkSize
+				wY := j + c.Y*ChunkSize
+				text.Draw(sprite.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Red300)
+			}
 		}
 	}
 

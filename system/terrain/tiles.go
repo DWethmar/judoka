@@ -14,8 +14,9 @@ import (
 var NotFound = assets.TerrainImg.SubImage(assets.TerrainCells[0][0]).(*ebiten.Image)
 
 const (
-	DirtTile  int = 0
+	Water     int = 0
 	GrassTile int = 1
+	DirtTile  int = 2
 )
 
 func getNeighbors(x, y int, l *level.Level) *tilebitmasking.Neighborhood {
@@ -56,7 +57,7 @@ func Shapes(x, y int, l *level.Level) *ebiten.Image {
 	bitmask := tilebitmasking.Calculate(neighbors)
 
 	// log bitmask
-	fmt.Printf("x: %d, y: %d,  bitmask: %08b\n", x, y, bitmask)
+	// fmt.Printf("x: %d, y: %d,  bitmask: %08b\n", x, y, bitmask)
 
 	return getTileImage(neighbors.Center, bitmask)
 }
