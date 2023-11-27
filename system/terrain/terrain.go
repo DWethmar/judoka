@@ -3,6 +3,7 @@ package terrain
 import (
 	"fmt"
 	"log/slog"
+	"math"
 
 	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
@@ -10,7 +11,6 @@ import (
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
-	"github.com/dwethmar/judoka/transform"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/exp/shiny/materialdesign/colornames"
@@ -80,10 +80,15 @@ func (s *System) Draw(screen *ebiten.Image) error {
 // Update implements system.System.
 func (s *System) Update() error {
 	for _, e := range s.register.Actor.Entities() {
-		x, y := transform.Position(s.register, e)
+		var x, y int
+		if t, ok := s.register.Transform.First(e); ok {
+			x = t.X
+			y = t.Y
+		}
 
-		chunkX := (x / s.PositionResolution) / (ChunkSize * TileSize)
-		chunkY := (y / s.PositionResolution) / (ChunkSize * TileSize)
+		// Assign a value to chunkX
+		chunkX := int(math.Floor(float64(x) / (float64(s.PositionResolution) * float64(ChunkSize*TileSize))))
+		chunkY := int(math.Floor(float64(y) / (float64(s.PositionResolution) * float64(ChunkSize*TileSize))))
 
 		// Create chunk if it does not exist
 		if s.level.Chunk(chunkX, chunkY) == nil {
@@ -98,7 +103,7 @@ func (s *System) Update() error {
 				return fmt.Errorf("failed to generate chunk: %w", err)
 			}
 
-			// 3. Draw chunk
+			// 3. Draw chunk, draws it to its sprite component
 			if err := s.DrawChunk(c); err != nil {
 				return fmt.Errorf("failed to draw chunk: %w", err)
 			}
@@ -192,8 +197,8 @@ func (s *System) DrawChunk(c *component.Chunk) error {
 				goto drawdebug
 			}
 			{
-				w := image.Bounds().Max.X - image.Bounds().Min.X
-				h := image.Bounds().Max.Y - image.Bounds().Min.Y
+				w := image.Bounds().Dx()
+				h := image.Bounds().Dy()
 
 				op := &ebiten.DrawImageOptions{}
 				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))

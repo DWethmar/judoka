@@ -59,7 +59,7 @@ func (r *System) Draw(screen *ebiten.Image) error {
 			layer = l.Index
 		}
 
-		// check if out of bounds
+		// check if layers is out of bounds
 		if layer < 0 {
 			return fmt.Errorf("layer is smaller than 0: %d", layer)
 		}

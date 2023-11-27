@@ -24,6 +24,9 @@ type System struct {
 	positionResolution int
 	viewport           entity.Entity
 	Follow             entity.Entity
+
+	screenWidth  int
+	screenHeight int
 }
 
 func New(opt Options) *System {
@@ -32,6 +35,9 @@ func New(opt Options) *System {
 		register:           opt.Register,
 		positionResolution: opt.PositionResolution,
 		viewport:           opt.Viewport,
+
+		screenWidth:  0,
+		screenHeight: 0,
 	}
 }
 
@@ -43,11 +49,16 @@ func (s *System) Init() error {
 
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
+	s.screenWidth, s.screenHeight = screen.Bounds().Dx(), screen.Bounds().Dy()
 	return nil
 }
 
 // Update implements system.System.
 func (s *System) Update() error {
+	if s.screenWidth == 0 || s.screenHeight == 0 {
+		return nil
+	}
+
 	// Get the transform of the entity we want to follow.
 	transform, ok := s.register.Transform.First(s.Follow)
 	if !ok {
@@ -60,32 +71,13 @@ func (s *System) Update() error {
 		return nil
 	}
 
-	// Get the size of the viewport.
-	widht, height := ebiten.WindowSize()
+	// set viewport to center of the screen
+	viewportTransform.X = (s.screenWidth / 2) * s.positionResolution
+	viewportTransform.Y = (s.screenHeight / 2) * s.positionResolution
 
-	// Calculate the center of the viewport.
-	centerX := (widht) / 2
-	centerY := (height) / 2
-
-	// Calculate the position of the entity we want to follow.
-	x := (transform.X - centerX) / s.positionResolution
-	y := (transform.Y - centerY) / s.positionResolution
-
-	// Calculate the position of the viewport.
-	viewportX := viewportTransform.X
-	viewportY := viewportTransform.Y
-
-	// Calculate the difference between the entity and the viewport.
-	diffX := x - viewportX
-	diffY := y - viewportY
-
-	// Calculate the new position of the viewport.
-	newViewportX := viewportX + diffX
-	newViewportY := viewportY + diffY
-
-	// Calculate the new position of the viewport.
-	viewportTransform.X = newViewportX
-	viewportTransform.Y = newViewportY
+	// Set the viewport to the position of the entity we want to follow.
+	viewportTransform.X -= transform.X
+	viewportTransform.Y -= transform.Y
 
 	return nil
 }

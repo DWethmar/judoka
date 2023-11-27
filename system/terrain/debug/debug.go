@@ -76,6 +76,12 @@ func (*Generator) Generate(minX int, maxX int, minY int, maxY int) matrix.Matrix
 			}
 		}
 
+		// Z
+		m.Set(12, 13, 1)
+		m.Set(13, 13, 1)
+		m.Set(13, 14, 1)
+		m.Set(14, 14, 1)
+
 		return m
 	}
 

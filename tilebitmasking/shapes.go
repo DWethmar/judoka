@@ -228,4 +228,27 @@ const (
 	//	1X1
 	//	010
 	NorthwestNorthNortheastEastSouthWestEdges = 0b01011111
+
+	// turn corners. These tiles can be used to create turn corners.
+
+	// EastSouthEdges is a tile that has edges on the north side and south east.
+	//	000
+	//	0x1
+	//	010
+	EastSouthEdges = 0b01010000
+	// SouthWestEdges is a tile that has edges on the south and west side.
+	//	000
+	//	1X0
+	//	010
+	SouthWestEdges = 0b01001000
+	// NorthEastEdges is a tile that has edges on the north and east side.
+	//	010
+	//	0X1
+	//	000
+	NorthEastEdges = 0b00010010
+	// NorthWestEdges is a tile that has edges on the north and west side.
+	//	010
+	//	1X0
+	//	000
+	NorthWestEdges = 0b00001010
 )

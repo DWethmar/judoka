@@ -10,6 +10,7 @@ import (
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/system"
+	"github.com/dwethmar/judoka/transform"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
@@ -75,13 +76,15 @@ func (s *System) Init() error {
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
 	for _, e := range s.register.Actor.Entities() {
-		transform, ok := s.register.Transform.First(e)
+		t, ok := s.register.Transform.First(e)
 		if !ok {
 			continue
 		}
 
-		x := transform.X / s.positionResolution
-		y := transform.Y / s.positionResolution
+		var x, y = transform.Position(s.register, e)
+
+		x /= s.positionResolution
+		y /= s.positionResolution
 
 		velocity, ok := s.register.Velocity.First(e)
 		if !ok {
@@ -105,10 +108,10 @@ Facing:%s
 AnimationFrame:%d
 Layer:%d
 `,
-			transform.X,
-			transform.X/s.positionResolution,
-			transform.Y,
-			transform.Y/s.positionResolution,
+			t.X,
+			t.X/s.positionResolution,
+			t.Y,
+			t.Y/s.positionResolution,
 			velocity.X, velocity.Y,
 			actor.ActorType,
 			actor.Facing,
