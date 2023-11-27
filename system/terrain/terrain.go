@@ -5,15 +5,12 @@ import (
 	"log/slog"
 	"math"
 
-	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
-	"golang.org/x/exp/shiny/materialdesign/colornames"
 )
 
 const (
@@ -189,7 +186,7 @@ func (s *System) DrawChunk(c *component.Chunk) error {
 		x := i * TileSize
 		for j := 0; j < ChunkSize; j++ { // y
 			y := j * TileSize
-			tile := c.Tiles.Get(i, j, -1)
+			// tile := c.Tiles.Get(i, j, -1)
 
 			image := Shapes(i+(ChunkSize*c.X), j+(ChunkSize*c.Y), s.level)
 			if image == nil {
@@ -206,9 +203,9 @@ func (s *System) DrawChunk(c *component.Chunk) error {
 				sprite.Image.DrawImage(image, op)
 			}
 		drawdebug:
-			wX := i + c.X*ChunkSize
-			wY := j + c.Y*ChunkSize
-			text.Draw(sprite.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Yellow700)
+			// wX := i + c.X*ChunkSize
+			// wY := j + c.Y*ChunkSize
+			// text.Draw(sprite.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Yellow700)
 		}
 	}
 

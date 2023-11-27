@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>judoka wasm</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <script type="text/javascript" src="wasm_exec.js"></script>
+    <script>
+        // Polyfill
+        if (!WebAssembly.instantiateStreaming) {
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
+
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("judoka.wasm"), go.importObject).then(result => {
+            go.run(result.instance);
+        });
+    </script>
+</head>
+
+<body></body>
+
+</html>

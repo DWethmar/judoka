@@ -1,6 +1,6 @@
 # The output binary name
 BINARY_NAME=judoka
-
+OUTPUT_DIR=bin
 # Go tools
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -10,14 +10,19 @@ GOTEST=$(GOCMD) test
 all: build
 
 build: 
-	$(GOBUILD) -o $(BINARY_NAME) -v
+	$(GOBUILD) -o $(OUTPUT_DIR)/$(BINARY_NAME) -v
+
+build-wasm:	
+	GOOS=js GOARCH=wasm $(GOBUILD) -o $(OUTPUT_DIR)/$(BINARY_NAME).wasm
+	cp $$(go env GOROOT)/misc/wasm/wasm_exec.js $(OUTPUT_DIR)
+	cp provision/wasm/index.html $(OUTPUT_DIR)
 
 test: 
 	$(GOTEST) -v ./...
 
 clean: 
 	$(GOCLEAN)
-	rm -f $(BINARY_NAME)
+	rm -fr $(OUTPUT_DIR)
 
 run: build
 	./$(BINARY_NAME)

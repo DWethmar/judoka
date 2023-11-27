@@ -251,4 +251,27 @@ const (
 	//	1X0
 	//	000
 	NorthWestEdges = 0b00001010
+
+	// fish shaped corners, all diagonal edges are the different except one.
+
+	// NorthEastSouthSouthwestWestEdges
+	//	010
+	//	1X1
+	//	110
+	NorthEastSouthSouthwestWestEdges = 0b01111010
+	// NorthwestNorthEastSouthWestEdges
+	//	110
+	//	1X1
+	//	010
+	NorthwestNorthEastSouthWestEdges = 0b01011011
+	// NorthNorthEastEastSouthEdges
+	//	011
+	//	1X1
+	//	010
+	NorthNortheastEastSouthWestEdges = 0b01011110
+	// NorthEastSoutheastSouthWestEdges
+	//	010
+	//	1X1
+	//	011
+	NorthEastSoutheastSouthWestEdges = 0b11011010
 )
