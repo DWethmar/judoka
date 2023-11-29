@@ -3,6 +3,7 @@ package camera
 import (
 	"image"
 	"log/slog"
+	"math"
 
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
@@ -17,7 +18,7 @@ type Camera struct {
 	Viewport           entity.Entity
 	currentX, currentY int
 	targetX, targetY   int
-	Bounds             image.Rectangle
+	Bounds             image.Rectangle // bounds of the camera
 }
 
 func (c *Camera) Target(x, y int) {
@@ -82,10 +83,25 @@ func (s *System) Update() error {
 		return nil
 	}
 
-	// Smooth transition: move current towards target with an offset
-	offset := 0.1 // Adjust this value to change the smoothness
-	s.camera.currentX += int(float64(s.camera.targetX-s.camera.currentX) * offset)
-	s.camera.currentY += int(float64(s.camera.targetY-s.camera.currentY) * offset)
+	// Calculate distance to target
+	dx := s.camera.targetX - s.camera.currentX
+	dy := s.camera.targetY - s.camera.currentY
+	distance := math.Sqrt(float64(dx*dx + dy*dy))
+
+	maxDistance := 100.0 * float64(s.positionResolution) // Maximum distance the camera can be from the target
+
+	// Clamp the distance
+	if distance >= maxDistance {
+		// Calculate the clamped position
+		clampRatio := maxDistance / distance
+		s.camera.currentX += int(float64(dx) * clampRatio)
+		s.camera.currentY += int(float64(dy) * clampRatio)
+	} else {
+		// Smooth transition
+		offset := 0.05 // Adjust this value to change the smoothness
+		s.camera.currentX += int(float64(dx) * offset)
+		s.camera.currentY += int(float64(dy) * offset)
+	}
 
 	// set viewport to center of the screen
 	viewportTransform.X = (screenWidth / 2) * s.positionResolution

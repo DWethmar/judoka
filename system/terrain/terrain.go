@@ -42,6 +42,7 @@ type System struct {
 	level              *level.Level  // used to link chunks together
 	terrainEntity      entity.Entity // used to group all all chunk entities
 	debug              bool          // used to draw debug info
+	frame              int           // used to draw water, resets every 10 frames
 }
 
 func New(
@@ -54,6 +55,7 @@ func New(
 		defaultGenerator:   opt.Generator,
 		level:              level.New(ChunkSize),
 		debug:              false,
+		frame:              0,
 	}
 }
 
@@ -78,6 +80,10 @@ func (s *System) Init(camera *camera.Camera) error {
 
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
+	if s.frame++; s.frame > 1000 {
+		s.frame = 0
+	}
+
 	minTileX := (s.camera.Bounds.Min.X / TileSize) - 1
 	minTileY := (s.camera.Bounds.Min.Y / TileSize) - 1
 
@@ -98,16 +104,35 @@ func (s *System) Draw(screen *ebiten.Image) error {
 			neighbors := Neighbors(i, j, s.level)
 			bitmask := tilebitmasking.Calculate(neighbors)
 
+			// Draw water if bitmask is not all edges
 			if bitmask != tilebitmasking.AllEdges {
 				s.DrawTile(screen, assets.Water1, i, j)
 			}
 
-			image := TileImage(neighbors.Center, bitmask)
-			if image == nil {
-				continue
-			}
+			if neighbors.Center == Water {
+				invert := s.frame%33 == 0
 
-			s.DrawTile(screen, image, i, j)
+				if j%2 == 0 {
+					if invert {
+						s.DrawTile(screen, assets.Water2, i, j)
+					} else {
+						s.DrawTile(screen, assets.Water1, i, j)
+					}
+				} else {
+					if invert {
+						s.DrawTile(screen, assets.Water1, i, j)
+					} else {
+						s.DrawTile(screen, assets.Water2, i, j)
+					}
+				}
+			} else {
+				// draw shape
+				image := TileImage(neighbors.Center, bitmask)
+				if image == nil {
+					continue
+				}
+				s.DrawTile(screen, image, i, j)
+			}
 
 			// text.Draw(screen, fmt.Sprintf("X%d\nY%d", i, j), assets.GetVGAFonts(1), int(dx)+1, int(dy)+7, colornames.Black)
 			// text.Draw(screen, fmt.Sprintf("X%d\nY%d", i, j), assets.GetVGAFonts(1), int(dx)+2, int(dy)+8, colornames.Yellow500)
