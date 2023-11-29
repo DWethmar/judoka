@@ -1,8 +1,6 @@
 package terrain
 
 import (
-	"fmt"
-
 	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/tilebitmasking"
@@ -33,7 +31,11 @@ func getNeighbors(x, y int, l *level.Level) *tilebitmasking.Neighborhood {
 	}
 }
 
-func getTileImage(currentTile int, bitmask int) *ebiten.Image {
+func Neighbors(x, y int, l *level.Level) *tilebitmasking.Neighborhood {
+	return getNeighbors(x, y, l)
+}
+
+func TileImage(currentTile int, bitmask int) *ebiten.Image {
 	switch currentTile {
 	case GrassTile:
 		s, ok := GrassShapes[bitmask]
@@ -49,17 +51,4 @@ func getTileImage(currentTile int, bitmask int) *ebiten.Image {
 	}
 
 	return NotFound
-}
-
-func Shapes(x, y int, l *level.Level) *ebiten.Image {
-	if x == 5 && y == -12 {
-		fmt.Println("debugger")
-	}
-	neighbors := getNeighbors(x, y, l)
-	bitmask := tilebitmasking.Calculate(neighbors)
-
-	// log bitmask
-	// fmt.Printf("x: %d, y: %d,  bitmask: %08b\n", x, y, bitmask)
-
-	return getTileImage(neighbors.Center, bitmask)
 }

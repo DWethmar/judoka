@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
+	"github.com/dwethmar/judoka/tilebitmasking"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -92,25 +94,19 @@ func (s *System) Draw(screen *ebiten.Image) error {
 				continue
 			}
 
-			image := Shapes(i, j, s.level)
+			neighbors := Neighbors(i, j, s.level)
+			bitmask := tilebitmasking.Calculate(neighbors)
+
+			if bitmask != tilebitmasking.AllEdges {
+				s.DrawTile(screen, assets.Water1, i, j)
+			}
+
+			image := TileImage(neighbors.Center, bitmask)
 			if image == nil {
 				continue
 			}
 
-			op := &ebiten.DrawImageOptions{}
-
-			w := image.Bounds().Dx()
-			h := image.Bounds().Dy()
-
-			op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
-
-			dx := float64(i * TileSize)
-			dy := float64(j * TileSize)
-			dx -= float64(s.camera.Bounds.Min.X)
-			dy -= float64(s.camera.Bounds.Min.Y)
-
-			op.GeoM.Translate(dx, dy)
-			screen.DrawImage(image, op)
+			s.DrawTile(screen, image, i, j)
 
 			// text.Draw(screen, fmt.Sprintf("X%d\nY%d", i, j), assets.GetVGAFonts(1), int(dx)+1, int(dy)+7, colornames.Black)
 			// text.Draw(screen, fmt.Sprintf("X%d\nY%d", i, j), assets.GetVGAFonts(1), int(dx)+2, int(dy)+8, colornames.Yellow500)
@@ -118,6 +114,24 @@ func (s *System) Draw(screen *ebiten.Image) error {
 	}
 
 	return nil
+}
+
+// DrawTile draws a tile at the given tile index.
+func (s *System) DrawTile(screen *ebiten.Image, image *ebiten.Image, x, y int) {
+	op := &ebiten.DrawImageOptions{}
+
+	w := image.Bounds().Dx()
+	h := image.Bounds().Dy()
+
+	op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
+
+	dx := float64(x * TileSize)
+	dy := float64(y * TileSize)
+	dx -= float64(s.camera.Bounds.Min.X)
+	dy -= float64(s.camera.Bounds.Min.Y)
+
+	op.GeoM.Translate(dx, dy)
+	screen.DrawImage(image, op)
 }
 
 // Update implements system.System.

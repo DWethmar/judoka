@@ -33,7 +33,7 @@ func (g *Generator) Generate(minX int, maxX int, minY int, maxY int) matrix.Matr
 	w := maxX - minX
 	h := maxY - minY
 
-	scale := 100.0 // Adjust this scale factor as needed
+	scale := 30.0 // Adjust this scale factor as needed
 	p := perlin.NewPerlin(g.alpha, g.beta, g.n, g.seed)
 	m := matrix.New(w, h, 0)
 

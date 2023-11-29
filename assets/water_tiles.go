@@ -14,6 +14,9 @@ const (
 var (
 	WaterImg   *ebiten.Image
 	WaterCells = CreateCells(WaterTileColumns, WaterTileRows, TerrainTileWidth, TerrainTileHeight)
+
+	Water1 *ebiten.Image
+	Water2 *ebiten.Image
 )
 
 func init() {
@@ -23,4 +26,7 @@ func init() {
 	}
 
 	WaterImg = ebiten.NewImageFromImage(img)
+
+	Water1 = WaterImg.SubImage(WaterCells[0][0]).(*ebiten.Image)
+	Water2 = WaterImg.SubImage(WaterCells[1][0]).(*ebiten.Image)
 }
