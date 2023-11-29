@@ -12,6 +12,19 @@ import (
 
 var _ system.System = (*System)(nil)
 
+// Camera is a shared struct that is used to follow an entity.
+type Camera struct {
+	Viewport           entity.Entity
+	currentX, currentY int
+	targetX, targetY   int
+	Bounds             image.Rectangle
+}
+
+func (c *Camera) Target(x, y int) {
+	c.targetX = x
+	c.targetY = y
+}
+
 type Options struct {
 	Logger             *slog.Logger
 	Register           *registry.Register
@@ -24,7 +37,7 @@ type System struct {
 	register           *registry.Register
 	positionResolution int
 	screenBounds       image.Rectangle
-	camera             *system.Camera
+	camera             *Camera
 }
 
 func New(opt Options) *System {
@@ -32,7 +45,7 @@ func New(opt Options) *System {
 		logger:             opt.Logger,
 		register:           opt.Register,
 		positionResolution: opt.PositionResolution,
-		camera: &system.Camera{
+		camera: &Camera{
 			Viewport: opt.Viewport,
 		},
 		screenBounds: image.Rectangle{},
@@ -41,11 +54,10 @@ func New(opt Options) *System {
 
 // Init implements system.System.
 func (s *System) Init() error {
-	s.camera.Following = s.register.Controller.Entities()[0]
 	return nil
 }
 
-func (s *System) Camera() *system.Camera {
+func (s *System) Camera() *Camera {
 	return s.camera
 }
 
@@ -64,35 +76,34 @@ func (s *System) Update() error {
 	screenWidth := s.screenBounds.Dx()
 	screenHeight := s.screenBounds.Max.Y
 
-	// Get the transform of the entity we want to follow.
-	transform, ok := s.register.Transform.First(s.camera.Following)
-	if !ok {
-		return nil
-	}
-
 	// Get the transform of the viewport.
 	viewportTransform, ok := s.register.Transform.First(s.camera.Viewport)
 	if !ok {
 		return nil
 	}
 
+	// Smooth transition: move current towards target with an offset
+	offset := 0.1 // Adjust this value to change the smoothness
+	s.camera.currentX += int(float64(s.camera.targetX-s.camera.currentX) * offset)
+	s.camera.currentY += int(float64(s.camera.targetY-s.camera.currentY) * offset)
+
 	// set viewport to center of the screen
 	viewportTransform.X = (screenWidth / 2) * s.positionResolution
 	viewportTransform.Y = (screenHeight / 2) * s.positionResolution
 
 	// Set the viewport to the position of the entity we want to follow.
-	viewportTransform.X -= transform.X
-	viewportTransform.Y -= transform.Y
+	viewportTransform.X -= s.camera.currentX
+	viewportTransform.Y -= s.camera.currentY
 
 	// set bounds on camera
 	s.camera.Bounds = image.Rectangle{
 		Min: image.Point{
-			X: (transform.X / s.positionResolution) - (screenWidth / 2),
-			Y: (transform.Y / s.positionResolution) - (screenHeight / 2),
+			X: (s.camera.currentX / s.positionResolution) - (screenWidth / 2),
+			Y: (s.camera.currentY / s.positionResolution) - (screenHeight / 2),
 		},
 		Max: image.Point{
-			X: (transform.X / s.positionResolution) + (screenWidth / 2),
-			Y: (transform.Y / s.positionResolution) + (screenHeight / 2),
+			X: (s.camera.currentX / s.positionResolution) + (screenWidth / 2),
+			Y: (s.camera.currentY / s.positionResolution) + (screenHeight / 2),
 		},
 	}
 

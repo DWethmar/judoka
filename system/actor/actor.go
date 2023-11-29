@@ -10,6 +10,7 @@ import (
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/system"
+	"github.com/dwethmar/judoka/system/camera"
 	"github.com/dwethmar/judoka/transform"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -28,6 +29,7 @@ type System struct {
 	logger             *slog.Logger
 	register           *registry.Register
 	positionResolution int // used to divide X and Y positions
+	camera             *camera.Camera
 	rootEntity         entity.Entity
 	SubSystems         map[component.ActorType]SubSystem
 }
@@ -56,7 +58,9 @@ func New(opt Options) *System {
 }
 
 // Init initializes the system and all sub systems.
-func (s *System) Init() error {
+func (s *System) Init(camera *camera.Camera) error {
+	s.camera = camera
+
 	rootEntity, err := s.register.Create(s.register.Root())
 	if err != nil {
 		return fmt.Errorf("failed to create root entity: %w", err)
@@ -134,6 +138,12 @@ func (s *System) Update() error {
 		}
 
 		actorsByType[actor.ActorType] = append(actorsByType[actor.ActorType], actor)
+
+		if actor.ActorType == component.ActorTypePlayer {
+			if t, ok := s.register.Transform.First(e); ok {
+				s.camera.Target(t.X, t.Y)
+			}
+		}
 	}
 
 	for _, subSystem := range s.SubSystems {

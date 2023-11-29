@@ -10,6 +10,7 @@ import (
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
+	"github.com/dwethmar/judoka/system/camera"
 	"github.com/dwethmar/judoka/tilebitmasking"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -35,7 +36,7 @@ type System struct {
 	initialized        bool
 	logger             *slog.Logger
 	register           *registry.Register
-	camera             *system.Camera
+	camera             *camera.Camera
 	PositionResolution int // used to divide X and Y positions
 	defaultGenerator   Generator
 	level              *level.Level  // used to link chunks together
@@ -57,7 +58,7 @@ func New(
 }
 
 // init initializes the system.
-func (s *System) Init(camera *system.Camera) error {
+func (s *System) Init(camera *camera.Camera) error {
 	if s.initialized {
 		return nil
 	}

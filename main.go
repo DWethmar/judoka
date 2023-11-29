@@ -97,7 +97,7 @@ func main() {
 	terrainSystem.Init(cameraSystem.Camera())
 	renderSystem.Init()
 	velocitySystem.Init()
-	actorSystem.Init()
+	actorSystem.Init(cameraSystem.Camera())
 	cameraSystem.Init()
 
 	// systems
