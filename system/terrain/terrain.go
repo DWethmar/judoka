@@ -119,14 +119,18 @@ func (s *System) Draw(screen *ebiten.Image) error {
 // DrawTile draws a tile at the given tile index.
 func (s *System) DrawTile(screen *ebiten.Image, image *ebiten.Image, x, y int) {
 	op := &ebiten.DrawImageOptions{}
+	op.Filter = ebiten.FilterLinear
 
 	w := image.Bounds().Dx()
 	h := image.Bounds().Dy()
 
 	op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
 
+	// Translate to tile position
 	dx := float64(x * TileSize)
 	dy := float64(y * TileSize)
+
+	// Translate to camera position
 	dx -= float64(s.camera.Bounds.Min.X)
 	dy -= float64(s.camera.Bounds.Min.Y)
 
