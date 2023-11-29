@@ -42,6 +42,8 @@ func getTileImage(currentTile int, bitmask int) *ebiten.Image {
 		}
 	case DirtTile:
 		return assets.OldTerrainDirtCC
+	case Water:
+		return assets.WaterImg.SubImage(assets.WaterCells[0][0]).(*ebiten.Image)
 	default:
 		// Default case
 	}

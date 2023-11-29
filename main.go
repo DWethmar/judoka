@@ -47,54 +47,67 @@ func main() {
 	terrainGenerator := perlin.New()
 	// terrainGenerator := debug.New()
 
+	inputSystem := input.New(input.Options{
+		Logger:             logger,
+		Register:           register,
+		PositionResolution: PositionResolution,
+	})
+
+	// drawing systems
+	terrainSystem := terrain.New(terrain.Options{
+		Logger:             logger,
+		Register:           register,
+		PositionResolution: PositionResolution,
+		Generator:          terrainGenerator,
+	})
+
+	renderSystem := render.New(render.Options{
+		Logger:             logger,
+		Register:           register,
+		PositionResolution: PositionResolution,
+	})
+
+	// other systems
+	velocitySystem := velocity.New(velocity.Options{
+		Logger:   logger,
+		Register: register,
+	})
+
+	// actor syb systems
+	playerSubSystem := player.New(player.Options{
+		Logger:   logger,
+		Register: register,
+	})
+
+	actorSystem := actor.New(actor.Options{
+		Logger:             logger,
+		Register:           register,
+		PositionResolution: PositionResolution,
+		ActorSubSystems:    []actor.SubSystem{playerSubSystem},
+	})
+
+	cameraSystem := camera.New(camera.Options{
+		Logger:             logger,
+		Register:           register,
+		PositionResolution: PositionResolution,
+		Viewport:           register.Root(),
+	})
+
+	inputSystem.Init()
+	terrainSystem.Init(cameraSystem.Camera())
+	renderSystem.Init()
+	velocitySystem.Init()
+	actorSystem.Init()
+	cameraSystem.Init()
+
 	// systems
 	var systems []system.System = []system.System{
-		input.New(input.Options{
-			Logger:             logger,
-			Register:           register,
-			PositionResolution: PositionResolution,
-		}),
-		// drawing systems
-		terrain.New(terrain.Options{
-			Logger:             logger,
-			Register:           register,
-			PositionResolution: PositionResolution,
-			Generator:          terrainGenerator,
-		}),
-		render.New(render.Options{
-			Logger:             logger,
-			Register:           register,
-			PositionResolution: PositionResolution,
-		}),
-		// other systems
-		velocity.New(velocity.Options{
-			Logger:   logger,
-			Register: register,
-		}),
-		actor.New(actor.Options{
-			Logger:             logger,
-			Register:           register,
-			PositionResolution: PositionResolution,
-			ActorSubSystems: []actor.SubSystem{
-				player.New(player.Options{
-					Logger:   logger,
-					Register: register,
-				}),
-			},
-		}),
-		camera.New(camera.Options{
-			Logger:             logger,
-			Register:           register,
-			PositionResolution: PositionResolution,
-			Viewport:           register.Root(),
-		}),
-	}
-
-	// init systems
-	for _, s := range systems {
-		if err := s.Init(); err != nil {
-			log.Fatal(err)
-		}
+		inputSystem,
+		terrainSystem,
+		renderSystem,
+		velocitySystem,
+		actorSystem,
+		cameraSystem,
 	}
 
 	if err := ebiten.RunGame(

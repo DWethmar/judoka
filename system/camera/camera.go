@@ -1,6 +1,7 @@
 package camera
 
 import (
+	"image"
 	"log/slog"
 
 	"github.com/dwethmar/judoka/entity"
@@ -22,11 +23,8 @@ type System struct {
 	logger             *slog.Logger
 	register           *registry.Register
 	positionResolution int
-	viewport           entity.Entity
-	Follow             entity.Entity
-
-	screenWidth  int
-	screenHeight int
+	screenBounds       image.Rectangle
+	camera             *system.Camera
 }
 
 func New(opt Options) *System {
@@ -34,50 +32,69 @@ func New(opt Options) *System {
 		logger:             opt.Logger,
 		register:           opt.Register,
 		positionResolution: opt.PositionResolution,
-		viewport:           opt.Viewport,
-
-		screenWidth:  0,
-		screenHeight: 0,
+		camera: &system.Camera{
+			Viewport: opt.Viewport,
+		},
+		screenBounds: image.Rectangle{},
 	}
 }
 
 // Init implements system.System.
 func (s *System) Init() error {
-	s.Follow = s.register.Controller.Entities()[0]
+	s.camera.Following = s.register.Controller.Entities()[0]
 	return nil
+}
+
+func (s *System) Camera() *system.Camera {
+	return s.camera
 }
 
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
-	s.screenWidth, s.screenHeight = screen.Bounds().Dx(), screen.Bounds().Dy()
+	s.screenBounds = screen.Bounds()
 	return nil
 }
 
 // Update implements system.System.
 func (s *System) Update() error {
-	if s.screenWidth == 0 || s.screenHeight == 0 {
+	if s.screenBounds.Empty() {
 		return nil
 	}
 
+	screenWidth := s.screenBounds.Dx()
+	screenHeight := s.screenBounds.Max.Y
+
 	// Get the transform of the entity we want to follow.
-	transform, ok := s.register.Transform.First(s.Follow)
+	transform, ok := s.register.Transform.First(s.camera.Following)
 	if !ok {
 		return nil
 	}
 
 	// Get the transform of the viewport.
-	viewportTransform, ok := s.register.Transform.First(s.viewport)
+	viewportTransform, ok := s.register.Transform.First(s.camera.Viewport)
 	if !ok {
 		return nil
 	}
 
 	// set viewport to center of the screen
-	viewportTransform.X = (s.screenWidth / 2) * s.positionResolution
-	viewportTransform.Y = (s.screenHeight / 2) * s.positionResolution
+	viewportTransform.X = (screenWidth / 2) * s.positionResolution
+	viewportTransform.Y = (screenHeight / 2) * s.positionResolution
 
 	// Set the viewport to the position of the entity we want to follow.
 	viewportTransform.X -= transform.X
 	viewportTransform.Y -= transform.Y
+
+	// set bounds on camera
+	s.camera.Bounds = image.Rectangle{
+		Min: image.Point{
+			X: (transform.X / s.positionResolution) - (screenWidth / 2),
+			Y: (transform.Y / s.positionResolution) - (screenHeight / 2),
+		},
+		Max: image.Point{
+			X: (transform.X / s.positionResolution) + (screenWidth / 2),
+			Y: (transform.Y / s.positionResolution) + (screenHeight / 2),
+		},
+	}
 
 	return nil
 }

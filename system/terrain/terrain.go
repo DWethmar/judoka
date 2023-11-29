@@ -3,17 +3,13 @@ package terrain
 import (
 	"fmt"
 	"log/slog"
-	"math"
 
-	"github.com/dwethmar/judoka/assets"
 	"github.com/dwethmar/judoka/component"
 	"github.com/dwethmar/judoka/entity"
 	"github.com/dwethmar/judoka/entity/registry"
 	"github.com/dwethmar/judoka/level"
 	"github.com/dwethmar/judoka/system"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
-	"golang.org/x/exp/shiny/materialdesign/colornames"
 )
 
 const (
@@ -37,13 +33,12 @@ type System struct {
 	initialized        bool
 	logger             *slog.Logger
 	register           *registry.Register
+	camera             *system.Camera
 	PositionResolution int // used to divide X and Y positions
 	defaultGenerator   Generator
 	level              *level.Level  // used to link chunks together
 	terrainEntity      entity.Entity // used to group all all chunk entities
 	debug              bool          // used to draw debug info
-	waterBackground1   *ebiten.Image
-	waterBackground2   *ebiten.Image
 }
 
 func New(
@@ -60,10 +55,12 @@ func New(
 }
 
 // init initializes the system.
-func (s *System) Init() error {
+func (s *System) Init(camera *system.Camera) error {
 	if s.initialized {
 		return nil
 	}
+
+	s.camera = camera
 
 	terrainEntity, err := s.register.Create(s.register.Root())
 	if err != nil {
@@ -73,87 +70,78 @@ func (s *System) Init() error {
 	s.terrainEntity = terrainEntity
 	s.initialized = true
 
-	// draw water background
-	s.waterBackground1 = ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
-	for i := 0; i < ChunkSize; i++ { // x
-		x := i * TileSize
-		for j := 0; j < ChunkSize; j++ { // y
-			y := j * TileSize
-
-			image := assets.WaterImg.SubImage(assets.WaterCells[0][0]).(*ebiten.Image)
-			{
-				w := image.Bounds().Dx()
-				h := image.Bounds().Dy()
-
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
-				op.GeoM.Translate(float64(x), float64(y))
-				s.waterBackground1.DrawImage(image, op)
-			}
-		}
-	}
-
-	s.waterBackground2 = ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
-	for i := 0; i < ChunkSize; i++ { // x
-		x := i * TileSize
-		for j := 0; j < ChunkSize; j++ { // y
-			y := j * TileSize
-
-			image := assets.WaterImg.SubImage(assets.WaterCells[1][0]).(*ebiten.Image)
-			{
-				w := image.Bounds().Dx()
-				h := image.Bounds().Dy()
-
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
-				op.GeoM.Translate(float64(x), float64(y))
-				s.waterBackground2.DrawImage(image, op)
-			}
-		}
-	}
-
 	return nil
 }
 
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
+	minTileX := (s.camera.Bounds.Min.X / TileSize) - 1
+	minTileY := (s.camera.Bounds.Min.Y / TileSize) - 1
+
+	maxTileX := (s.camera.Bounds.Max.X / TileSize) + 1
+	maxTileY := (s.camera.Bounds.Max.Y / TileSize) + 1
+
+	for i := minTileX; i < maxTileX; i++ { // x
+		chunkX := i / ChunkSize
+
+		for j := minTileY; j < maxTileY; j++ { // y
+			chunkY := j / ChunkSize
+
+			chunk := s.level.Chunk(chunkX, chunkY)
+			if chunk == nil {
+				continue
+			}
+
+			image := Shapes(i, j, s.level)
+			if image == nil {
+				continue
+			}
+
+			op := &ebiten.DrawImageOptions{}
+
+			w := image.Bounds().Dx()
+			h := image.Bounds().Dy()
+
+			op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
+
+			dx := float64(i * TileSize)
+			dy := float64(j * TileSize)
+			dx -= float64(s.camera.Bounds.Min.X)
+			dy -= float64(s.camera.Bounds.Min.Y)
+
+			op.GeoM.Translate(dx, dy)
+			screen.DrawImage(image, op)
+
+			// text.Draw(screen, fmt.Sprintf("X%d\nY%d", i, j), assets.GetVGAFonts(1), int(dx)+1, int(dy)+7, colornames.Black)
+			// text.Draw(screen, fmt.Sprintf("X%d\nY%d", i, j), assets.GetVGAFonts(1), int(dx)+2, int(dy)+8, colornames.Yellow500)
+		}
+	}
+
 	return nil
 }
 
 // Update implements system.System.
 func (s *System) Update() error {
-	for _, e := range s.register.Actor.Entities() {
-		var x, y int
-		if t, ok := s.register.Transform.First(e); ok {
-			x = t.X
-			y = t.Y
-		}
+	minChunkX := (s.camera.Bounds.Min.X / (ChunkSize * TileSize)) - 1
+	minChunkY := (s.camera.Bounds.Min.Y / (ChunkSize * TileSize)) - 1
 
-		// Assign a value to chunkX
-		chunkX := int(math.Floor(float64(x) / (float64(s.PositionResolution) * float64(ChunkSize*TileSize))))
-		chunkY := int(math.Floor(float64(y) / (float64(s.PositionResolution) * float64(ChunkSize*TileSize))))
+	maxChunkX := (s.camera.Bounds.Max.X / (ChunkSize * TileSize)) + 1
+	maxChunkY := (s.camera.Bounds.Max.Y / (ChunkSize * TileSize)) + 1
 
-		// Create chunk if it does not exist
-		if s.level.Chunk(chunkX, chunkY) == nil {
-			// 1. Create chunk
-			c, err := s.CreateChunk(s.level, chunkX, chunkY)
-			if err != nil {
-				return fmt.Errorf("failed to create chunk: %w", err)
-			}
+	for i := minChunkX; i < maxChunkX; i++ { // x
+		for j := minChunkY; j < maxChunkY; j++ { // y
+			// Create chunk if it does not exist
+			if s.level.Chunk(i, j) == nil {
+				// 1. Create chunk
+				c, err := s.CreateChunk(s.level, i, j)
+				if err != nil {
+					return fmt.Errorf("failed to create chunk: %w", err)
+				}
 
-			// 2. Generate chunk
-			if err := s.GenerateChunk(c, s.defaultGenerator); err != nil {
-				return fmt.Errorf("failed to generate chunk: %w", err)
-			}
-
-			// 3. Draw chunk, draws it to its sprite component
-			if err := s.DrawChunk(c); err != nil {
-				return fmt.Errorf("failed to draw chunk: %w", err)
-			}
-
-			// 4. Redraw surrounding chunks, so they connect to the new chunk
-			if err := s.RedrawNeighboringChunks(chunkX, chunkY); err != nil {
-				return fmt.Errorf("failed to redraw neighboring chunks: %w", err)
+				// 2. Generate chunk
+				if err := s.GenerateChunk(c, s.defaultGenerator); err != nil {
+					return fmt.Errorf("failed to generate chunk: %w", err)
+				}
 			}
 		}
 	}
@@ -201,108 +189,6 @@ func (s *System) GenerateChunk(c *component.Chunk, generator Generator) error {
 		chunkY*ChunkSize,
 		(chunkY*ChunkSize)+ChunkSize,
 	)
-
-	// Create background sprite
-	{
-		spr := component.NewSprite(0, c.Entity(), 0, 0, s.waterBackground1)
-		spr.Name = "background"
-		if err := s.register.Sprite.Add(spr); err != nil {
-			return fmt.Errorf("failed to add sprite: %w", err)
-		}
-	}
-
-	// Create sprite
-	{
-		img := ebiten.NewImage(ChunkSize*TileSize, ChunkSize*TileSize)
-		spr := component.NewSprite(0, c.Entity(), 0, 0, img)
-		spr.Name = "terrain"
-		if err := s.register.Sprite.Add(spr); err != nil {
-			return fmt.Errorf("failed to add sprite: %w", err)
-		}
-	}
-
-	s.logger.Info("created chunk", slog.Group("chunk", slog.Int("x", chunkX), slog.Int("y", chunkY)))
-
-	return nil
-}
-
-// DrawChunk draws a chunk to its sprite component.
-// it is required that the chunk has a sprite component.
-func (s *System) DrawChunk(c *component.Chunk) error {
-	var sprite *component.Sprite
-	for _, spr := range s.register.Sprite.List(c.Entity()) {
-		if spr.Name == "terrain" {
-			sprite = spr
-			break
-		}
-	}
-
-	if sprite == nil {
-		return fmt.Errorf("sprite not found")
-	}
-
-	if sprite.Image == nil {
-		return fmt.Errorf("sprite image is nil")
-	}
-
-	sprite.Image.Clear()
-
-	for i := 0; i < ChunkSize; i++ { // x
-		x := i * TileSize
-		for j := 0; j < ChunkSize; j++ { // y
-			y := j * TileSize
-
-			tile := c.Tiles.Get(i, j, -1)
-			if tile <= 0 { // we skip drawing water
-				continue
-			}
-
-			image := Shapes(i+(ChunkSize*c.X), j+(ChunkSize*c.Y), s.level)
-			if image == nil {
-				// skip drawing
-				goto drawdebug
-			}
-			{
-				w := image.Bounds().Dx()
-				h := image.Bounds().Dy()
-
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(float64(TileSize)/float64(w), float64(TileSize)/float64(h))
-				op.GeoM.Translate(float64(x), float64(y))
-				sprite.Image.DrawImage(image, op)
-			}
-		drawdebug:
-			if s.debug {
-				wX := i + c.X*ChunkSize
-				wY := j + c.Y*ChunkSize
-				text.Draw(sprite.Image, fmt.Sprintf("T%d\nX%d\nY%d", tile, wX, wY), assets.GetVGAFonts(1), x+2, y+8, colornames.Red300)
-			}
-		}
-	}
-
-	s.logger.Info("created chunk", slog.Group("chunk", slog.Int("x", c.X), slog.Int("y", c.Y)))
-
-	return nil
-}
-
-// RedrawNeighboringChunks redraws all existing chunks around the given chunk index.
-func (s *System) RedrawNeighboringChunks(chunkX, chunkY int) error {
-	for x := chunkX - 1; x <= chunkX+1; x++ {
-		for y := chunkY - 1; y <= chunkY+1; y++ {
-			if x == chunkX && y == chunkY {
-				continue
-			}
-
-			c := s.level.Chunk(x, y)
-			if c == nil {
-				continue
-			}
-
-			if err := s.DrawChunk(c); err != nil {
-				return fmt.Errorf("failed to draw chunk: %w", err)
-			}
-		}
-	}
 
 	return nil
 }
