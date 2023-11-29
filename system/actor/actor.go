@@ -25,6 +25,14 @@ type SubSystem interface {
 	ActorType() component.ActorType
 }
 
+// Options are used to configure a new actor system.
+type Options struct {
+	Logger             *slog.Logger
+	Register           *registry.Register
+	PositionResolution int
+	ActorSubSystems    []SubSystem
+}
+
 type System struct {
 	logger             *slog.Logger
 	register           *registry.Register
@@ -32,14 +40,7 @@ type System struct {
 	camera             *camera.Camera
 	rootEntity         entity.Entity
 	SubSystems         map[component.ActorType]SubSystem
-}
-
-// Options are used to configure a new actor system.
-type Options struct {
-	Logger             *slog.Logger
-	Register           *registry.Register
-	PositionResolution int
-	ActorSubSystems    []SubSystem
+	Debug              bool
 }
 
 func New(opt Options) *System {
@@ -54,6 +55,7 @@ func New(opt Options) *System {
 		register:           opt.Register,
 		positionResolution: opt.PositionResolution,
 		SubSystems:         actorSubSystems,
+		Debug:              false,
 	}
 }
 
@@ -79,6 +81,10 @@ func (s *System) Init(camera *camera.Camera) error {
 
 // Draw implements system.System.
 func (s *System) Draw(screen *ebiten.Image) error {
+	if !s.Debug {
+		return nil
+	}
+
 	for _, e := range s.register.Actor.Entities() {
 		t, ok := s.register.Transform.First(e)
 		if !ok {
